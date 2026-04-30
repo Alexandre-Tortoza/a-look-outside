@@ -10,7 +10,6 @@ import torch
 import torch.nn as nn
 
 from modelos.base import ClassificadorGalaxias
-from modelos.multimodal import config as cfg
 
 
 class _BranchVisual(nn.Module):
@@ -67,11 +66,11 @@ class RedeMultimodal(nn.Module):
         num_classes: int = 10,
         num_features_tabulares: int = 6,
         pretrained: bool = True,
-        dim_visual: int = cfg.DIM_VISUAL,
-        dim_tabular: int = cfg.DIM_TABULAR,
-        dim_fusao: int = cfg.DIM_FUSAO,
-        dropout_fusao: float = cfg.DROPOUT_FUSAO,
-        dropout_tabular: float = cfg.DROPOUT_TABULAR,
+        dim_visual: int = 256,
+        dim_tabular: int = 256,
+        dim_fusao: int = 512,
+        dropout_fusao: float = 0.4,
+        dropout_tabular: float = 0.3,
     ) -> None:
         super().__init__()
         self.branch_visual = _BranchVisual(pretrained=pretrained, dim_saida=dim_visual)
@@ -95,7 +94,7 @@ class MultimodalGalaxy(ClassificadorGalaxias):
 
     def __init__(
         self,
-        num_features_tabulares: int = len(cfg.FEATURES_TABULARES),
+        num_features_tabulares: int = 6,
         pretrained: bool = True,
     ) -> None:
         self.num_features_tabulares = num_features_tabulares

@@ -6,21 +6,26 @@ Orquestra pré-treino (opcional) + fine-tuning.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
-from modelos.dino import config as cfg
 from modelos.dino.ajuste_fino import ajustar_fino
 from modelos.dino.pre_treino import pre_treinar
 from modelos.treinador import HistoricoTreino
+from utils.config_loader import carregar_config, obter_config_modelo
 
 
-def treinar(config_override: Optional[dict] = None) -> HistoricoTreino:
+def treinar(config_override: Optional[dict[str, Any]] = None) -> HistoricoTreino:
     """Treina o modelo DINO de ponta a ponta.
 
-    Se MODO_DINO = "hub": pula pré-treino, faz apenas fine-tuning.
-    Se MODO_DINO = "pre_treino": executa pré-treino + fine-tuning.
+    Se modo = "hub": pula pré-treino, faz apenas fine-tuning.
+    Se modo = "pre_treino": executa pré-treino + fine-tuning.
     """
-    modo = (config_override or {}).get("modo", cfg.MODO_DINO)
+    config = carregar_config()
+    params = obter_config_modelo("dino", config)
+    if config_override:
+        params.update(config_override)
+
+    modo = params.get("modo", "hub")
 
     caminho_backbone: Optional[Path] = None
     if modo == "pre_treino":

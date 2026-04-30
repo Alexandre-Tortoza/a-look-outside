@@ -1,222 +1,396 @@
-"""CLI do projeto Galaxy Classification.
+#!/usr/bin/python
+"""CLI interativa do projeto Galaxy10 Classification.
 
-Subcomandos:
-    preprocessar  — Executa pipeline de pré-processamento (normalização, balanceamento, aumento)
-    treinar       — Treina um modelo específico
-    avaliar       — Avalia um modelo com pesos salvos
-    explicar      — Gera visualização XAI para uma imagem
-    benchmark     — Treina e avalia múltiplos modelos
-    comparar      — Compara resultados de todos os modelos em docs/
-
-Exemplos:
-    python main.py treinar --modelo cnn --dataset decals --epocas 50
-    python main.py avaliar --modelo resnet50 --pesos pesos/resnet50/resnet50_decals_ep50.pth
-    python main.py benchmark --modelos cnn,resnet50,vit --dataset decals
-    python main.py preprocessar --dataset sdss --tecnica smote
-    python main.py explicar --modelo cnn --pesos pesos/cnn/cnn_decals_ep50.pth --imagem galaxy.png
+Uso:
+    python main.py              # Menu interativo
+    python main.py --help       # Ajuda
 """
 
 from __future__ import annotations
 
-import argparse
 import sys
 from pathlib import Path
 
+from InquirerPy import inquirer
+from InquirerPy.separator import Separator
+
+from utils.config_loader import (
+    carregar_config,
+    listar_experimentos,
+    listar_modelos,
+    obter_config_modelo,
+    obter_config_recursos,
+    obter_experimento,
+)
 from utils.logger import configurar_logger_global
 from utils.reproducibilidade import fixar_semente
 
 
 # ---------------------------------------------------------------------------
-# Subcomandos
+# Mapeamento de modelos disponiveis
 # ---------------------------------------------------------------------------
 
-def cmd_preprocessar(args: argparse.Namespace) -> None:
-    """Pré-processa o dataset: normalização, balanceamento ou aumento de dados."""
+_NOMES_DISPLAY = {
+    "cnn": "CNN Baseline",
+    "resnet50": "ResNet50",
+    "efficientnet": "EfficientNet-B0",
+    "vgg16": "VGG16",
+    "vit": "Vision Transformer (ViT)",
+    "dino": "DINO (Self-Supervised)",
+    "multimodal": "Multimodal (CNN + Tabular)",
+}
+
+_TECNICAS_PREPROCESS = [
+    {"name": "Upscale (69px → 224px, LANCZOS)", "value": "upscale"},
+    {"name": "SMOTE", "value": "smote"},
+    {"name": "ADASYN", "value": "adasyn"},
+    {"name": "Oversampling", "value": "oversampling"},
+    {"name": "Undersampling", "value": "undersampling"},
+    {"name": "Híbrido (SMOTE + undersampling)", "value": "hibrido"},
+    {"name": "Aumento de dados (data augmentation)", "value": "aumento"},
+]
+
+
+# ---------------------------------------------------------------------------
+# Ações do menu
+# ---------------------------------------------------------------------------
+
+
+def _acao_treinar(config: dict) -> None:
+    """Fluxo interativo para treinar modelos."""
+    modelos_disp = listar_modelos(config)
+
+    # Escolher entre experimento pre-definido ou selecao manual
+    exps = listar_experimentos(config)
+    opcoes_fonte = [{"name": "Selecionar manualmente", "value": "manual"}]
+    for exp in exps:
+        opcoes_fonte.append({"name": f"Experimento: {exp}", "value": exp})
+
+    fonte = inquirer.select(
+        message="Como deseja configurar o treino?",
+        choices=opcoes_fonte,
+    ).execute()
+
+    if fonte != "manual":
+        _rodar_experimento(config, fonte)
+        return
+
+    # Selecao manual
+    escolhas_modelos = [{"name": _NOMES_DISPLAY.get(m, m), "value": m} for m in modelos_disp]
+    modelos = inquirer.checkbox(
+        message="Selecione os modelos (espaco = marcar, enter = confirmar):",
+        choices=escolhas_modelos,
+        validate=lambda r: len(r) > 0,
+        invalid_message="Selecione pelo menos um modelo.",
+    ).execute()
+
+    dataset = inquirer.select(
+        message="Dataset de treino:",
+        choices=["decals", "sdss"],
+    ).execute()
+
+    # Detectar versoes disponiveis
     from dataset.carregador import CarregadorDataset
-    from pre_processamento.aumento_de_dados import aplicar_aumento, salvar_dataset_h5
-    from pre_processamento.balanceamento import executar_pipeline_balanceamento
 
-    fixar_semente(args.seed)
     carregador = CarregadorDataset()
-    imagens, rotulos = carregador.carregar(args.dataset)
-    print(f"Dataset carregado: {imagens.shape[0]} amostras")
+    versoes = carregador.listar_versoes_disponiveis(dataset)
+    versao = inquirer.select(
+        message="Versão do dataset:",
+        choices=versoes,
+    ).execute()
 
-    if args.tecnica == "aumento":
-        imagens, rotulos = aplicar_aumento(imagens, rotulos,
-                                           fator_multiplicacao=args.fator, semente=args.seed)
-        print(f"Após aumento: {imagens.shape[0]} amostras")
-        saida = Path(args.saida) / f"{args.dataset}_aumento.h5"
-    else:
-        imagens, rotulos = executar_pipeline_balanceamento(
-            imagens, rotulos, args.tecnica, semente=args.seed
-        )
-        print(f"Após balanceamento ({args.tecnica}): {imagens.shape[0]} amostras")
-        saida = Path(args.saida) / f"{args.dataset}_{args.tecnica}.h5"
+    cross = inquirer.confirm(
+        message="Avaliar em dataset diferente (cross-dataset)?",
+        default=False,
+    ).execute()
 
-    salvar_dataset_h5(imagens, rotulos, saida, args.dataset)
-    print(f"Salvo em: {saida}")
+    dataset_teste = None
+    if cross:
+        outro = "sdss" if dataset == "decals" else "decals"
+        dataset_teste = inquirer.select(
+            message="Dataset para avaliação:",
+            choices=[outro],
+            default=outro,
+        ).execute()
+
+    # Confirmar
+    print(f"\n{'=' * 50}")
+    print(f"  Modelos:  {', '.join(modelos)}")
+    print(f"  Dataset:  {dataset} ({versao})")
+    if dataset_teste:
+        print(f"  Cross:    avaliar em {dataset_teste}")
+    print(f"{'=' * 50}\n")
+
+    confirmar = inquirer.confirm(message="Iniciar treino?", default=True).execute()
+    if not confirmar:
+        print("Cancelado.")
+        return
+
+    for modelo in modelos:
+        print(f"\n{'=' * 60}")
+        print(f"  TREINANDO: {_NOMES_DISPLAY.get(modelo, modelo).upper()}")
+        print(f"{'=' * 60}")
+
+        override = {
+            "dataset": dataset,
+            "versao_dataset": versao,
+        }
+
+        treinar_fn = _importar_treinar(modelo)
+        historico = treinar_fn(config_override=override)
+        print(f"  {historico.resumo()}")
+
+        if dataset_teste:
+            print(f"\n  Avaliando cross-dataset em {dataset_teste}...")
+            avaliar_fn = _importar_avaliar(modelo)
+            # Encontrar o .pth mais recente
+            pesos = _encontrar_pesos_recentes(modelo)
+            if pesos:
+                avaliar_fn(pesos, config_override={"dataset_teste": dataset_teste})
 
 
-def cmd_treinar(args: argparse.Namespace) -> None:
-    """Treina um modelo."""
+def _acao_avaliar(config: dict) -> None:
+    """Fluxo interativo para avaliar um modelo."""
+    modelos_disp = listar_modelos(config)
+
+    modelo = inquirer.select(
+        message="Modelo a avaliar:",
+        choices=[{"name": _NOMES_DISPLAY.get(m, m), "value": m} for m in modelos_disp],
+    ).execute()
+
+    # Listar pesos disponiveis
+    dir_pesos = Path("pesos") / modelo
+    if not dir_pesos.exists() or not list(dir_pesos.glob("*.pth")):
+        print(f"Nenhum peso encontrado em {dir_pesos}/")
+        return
+
+    arquivos_pth = sorted(dir_pesos.glob("*.pth"), key=lambda p: p.stat().st_mtime, reverse=True)
+    escolhas_pesos = [{"name": p.name, "value": p} for p in arquivos_pth]
+    caminho_pesos = inquirer.select(
+        message="Arquivo de pesos:",
+        choices=escolhas_pesos,
+    ).execute()
+
+    cross = inquirer.confirm(
+        message="Avaliar em dataset diferente (cross-dataset)?",
+        default=False,
+    ).execute()
+
     override = {}
-    if args.dataset:
-        override["dataset"] = args.dataset
-    if args.epocas:
-        override["epocas"] = args.epocas
-    if args.batch_size:
-        override["batch_size"] = args.batch_size
-    if args.seed:
-        override["seed"] = args.seed
+    if cross:
+        dataset_teste = inquirer.select(
+            message="Dataset para avaliação:",
+            choices=["decals", "sdss"],
+        ).execute()
+        override["dataset_teste"] = dataset_teste
 
-    modelo = args.modelo.lower()
-    print(f"Treinando modelo: {modelo}")
+    avaliar_fn = _importar_avaliar(modelo)
+    resultado = avaliar_fn(caminho_pesos, config_override=override if override else None)
 
-    if modelo == "cnn":
-        from modelos.cnn.treino import treinar
-    elif modelo == "resnet50":
-        from modelos.resnet50.treino import treinar
-    elif modelo == "efficientnet":
-        from modelos.efficientnet.treino import treinar
-    elif modelo == "vgg16":
-        from modelos.vgg16.treino import treinar
-    elif modelo == "vit":
-        from modelos.vit.treino import treinar
-    elif modelo == "dino":
-        from modelos.dino.treino import treinar
-    elif modelo == "multimodal":
-        from modelos.multimodal.treino import treinar
-    else:
-        print(f"Modelo '{modelo}' não reconhecido. Use: cnn, resnet50, efficientnet, vgg16, vit, dino, multimodal")
-        sys.exit(1)
-
-    historico = treinar(config_override=override if override else None)
-    print(f"\n{historico.resumo()}")
-
-
-def cmd_avaliar(args: argparse.Namespace) -> None:
-    """Avalia um modelo com pesos salvos."""
     from utils.metricas import formatar_para_markdown
 
-    override = {}
-    if args.dataset:
-        override["dataset"] = args.dataset
-
-    modelo = args.modelo.lower()
-    caminho_pesos = Path(args.pesos)
-
-    if not caminho_pesos.exists():
-        print(f"Arquivo de pesos não encontrado: {caminho_pesos}")
-        sys.exit(1)
-
-    print(f"Avaliando modelo: {modelo} com pesos: {caminho_pesos}")
-
-    if modelo == "cnn":
-        from modelos.cnn.avaliacao import avaliar
-    elif modelo == "resnet50":
-        from modelos.resnet50.avaliacao import avaliar
-    elif modelo == "efficientnet":
-        from modelos.efficientnet.avaliacao import avaliar
-    elif modelo == "vgg16":
-        from modelos.vgg16.avaliacao import avaliar
-    elif modelo == "vit":
-        from modelos.vit.avaliacao import avaliar
-    elif modelo == "dino":
-        from modelos.dino.avaliacao import avaliar
-    elif modelo == "multimodal":
-        from modelos.multimodal.avaliacao import avaliar
-    else:
-        print(f"Modelo '{modelo}' não reconhecido.")
-        sys.exit(1)
-
-    resultado = avaliar(caminho_pesos, config_override=override if override else None)
     print(formatar_para_markdown(resultado))
 
 
-def cmd_explicar(args: argparse.Namespace) -> None:
-    """Gera visualização XAI para uma imagem."""
+def _acao_preprocessar(config: dict) -> None:
+    """Fluxo interativo para pre-processar dataset."""
+    dataset = inquirer.select(
+        message="Dataset:",
+        choices=["decals", "sdss"],
+    ).execute()
+
+    tecnica = inquirer.select(
+        message="Técnica de pré-processamento:",
+        choices=_TECNICAS_PREPROCESS,
+    ).execute()
+
+    fator = 2
+    if tecnica == "aumento":
+        fator = int(
+            inquirer.text(
+                message="Fator de multiplicação:",
+                default="2",
+                validate=lambda v: v.isdigit() and int(v) > 0,
+            ).execute()
+        )
+
+    seed = config.get("global", {}).get("seed", 42)
+
+    print(f"\nPré-processando {dataset} com {tecnica}...")
+
+    from dataset.carregador import CarregadorDataset
+    from pre_processamento.aumento_de_dados import aplicar_aumento, salvar_dataset_h5
+    from pre_processamento.balanceamento import executar_pipeline_balanceamento
+    from pre_processamento.upscale import aplicar_upscale
+
+    fixar_semente(seed)
+    carregador = CarregadorDataset()
+    imagens, rotulos = carregador.carregar(dataset)
+    print(f"Dataset carregado: {imagens.shape[0]} amostras, shape {imagens.shape[1:]}")
+
+    if tecnica == "upscale":
+        tamanho = config.get("global", {}).get("tamanho_imagem", 224)
+        print(f"Upscale {imagens.shape[1]}px → {tamanho}px (LANCZOS)...")
+        imagens = aplicar_upscale(imagens, tamanho_alvo=tamanho)
+        print(f"Após upscale: shape {imagens.shape[1:]}")
+        saida = Path("dataset/processados") / f"{dataset}_upscale.h5"
+    elif tecnica == "aumento":
+        imagens, rotulos = aplicar_aumento(
+            imagens, rotulos, fator_multiplicacao=fator, semente=seed
+        )
+        print(f"Após aumento: {imagens.shape[0]} amostras")
+        saida = Path("dataset/processados") / f"{dataset}_aumento.h5"
+    else:
+        imagens, rotulos = executar_pipeline_balanceamento(imagens, rotulos, tecnica, semente=seed)
+        print(f"Após balanceamento ({tecnica}): {imagens.shape[0]} amostras")
+        saida = Path("dataset/processados") / f"{dataset}_{tecnica}.h5"
+
+    salvar_dataset_h5(imagens, rotulos, saida, dataset)
+    print(f"Salvo em: {saida}")
+
+
+def _acao_explicar(config: dict) -> None:
+    """Fluxo interativo para gerar XAI."""
     import numpy as np
     from PIL import Image
 
     from modelos import obter_modelo
+    from pre_processamento.normalizacao import obter_transform_avaliacao
+    from utils.checkpoint import carregar_checkpoint
     from utils.visualizacao import plotar_sobreposicao_xai
 
-    caminho_imagem = Path(args.imagem)
-    caminho_pesos = Path(args.pesos)
+    modelos_disp = listar_modelos(config)
+    modelo = inquirer.select(
+        message="Modelo:",
+        choices=[{"name": _NOMES_DISPLAY.get(m, m), "value": m} for m in modelos_disp],
+    ).execute()
 
-    if not caminho_imagem.exists():
-        print(f"Imagem não encontrada: {caminho_imagem}")
-        sys.exit(1)
+    dir_pesos = Path("pesos") / modelo
+    if not dir_pesos.exists() or not list(dir_pesos.glob("*.pth")):
+        print(f"Nenhum peso encontrado em {dir_pesos}/")
+        return
+
+    arquivos_pth = sorted(dir_pesos.glob("*.pth"), key=lambda p: p.stat().st_mtime, reverse=True)
+    caminho_pesos = inquirer.select(
+        message="Arquivo de pesos:",
+        choices=[{"name": p.name, "value": p} for p in arquivos_pth],
+    ).execute()
+
+    caminho_imagem = inquirer.filepath(
+        message="Caminho da imagem (PNG/JPG):",
+        validate=lambda p: Path(p).exists(),
+        invalid_message="Arquivo não encontrado.",
+    ).execute()
 
     imagem = np.array(Image.open(caminho_imagem).convert("RGB"))
-    classificador = obter_modelo(args.modelo)
+    classificador = obter_modelo(modelo)
 
     import torch
-    from pre_processamento.normalizacao import obter_transform_avaliacao
-    from pre_processamento import config as pre_cfg
 
-    transform = obter_transform_avaliacao()
+    params = obter_config_modelo(modelo, config)
+    tamanho = params.get("tamanho_imagem", 224)
+
+    transform = obter_transform_avaliacao(tamanho_imagem=tamanho)
     tensor = transform(imagem).unsqueeze(0)
-    rede = classificador.construir(num_classes=10, tamanho_imagem=pre_cfg.TAMANHO_PADRAO)
-    rede.load_state_dict(torch.load(caminho_pesos, map_location="cpu"))
+    rede = classificador.construir(num_classes=10, tamanho_imagem=tamanho)
+    carregar_checkpoint(caminho_pesos, rede)
     rede.eval()
 
-    mapa = classificador.explicar(rede, tensor, classe_alvo=args.classe_alvo)
-
-    nome_saida = args.saida or f"docs/{args.modelo}/xai/{caminho_imagem.stem}_xai.png"
-    plotar_sobreposicao_xai(imagem, mapa, Path(nome_saida), titulo=f"XAI — {args.modelo}")
+    mapa = classificador.explicar(rede, tensor, classe_alvo=None)
+    nome_saida = Path(f"docs/{modelo}/xai/{Path(caminho_imagem).stem}_xai.png")
+    plotar_sobreposicao_xai(imagem, mapa, nome_saida, titulo=f"XAI — {modelo}")
     print(f"XAI salvo em: {nome_saida}")
 
 
-def cmd_benchmark(args: argparse.Namespace) -> None:
-    """Treina e avalia múltiplos modelos sequencialmente."""
-    modelos = [m.strip() for m in args.modelos.split(",")]
-    override = {}
-    if args.dataset:
-        override["dataset"] = args.dataset
-    if args.epocas:
-        override["epocas"] = args.epocas
+def _acao_info(config: dict) -> None:
+    """Mostra informações do sistema e datasets."""
+    from utils.recursos import info_recursos
+    from dataset.carregador import CarregadorDataset
 
-    resultados = {}
-    for modelo in modelos:
-        print(f"\n{'='*60}")
-        print(f"BENCHMARK: {modelo.upper()}")
-        print(f"{'='*60}")
-        args.modelo = modelo
-        cmd_treinar(args)
+    info = info_recursos()
+    cfg_rec = obter_config_recursos(config)
 
-        # Tenta avaliar automaticamente se os pesos existirem
-        dataset = override.get("dataset", "decals")
-        epocas = override.get("epocas", 50)
-        caminho_pesos = Path(f"pesos/{modelo}/{modelo}_{dataset}_ep{epocas}.pth")
-        if caminho_pesos.exists():
-            args.pesos = str(caminho_pesos)
-            cmd_avaliar(args)
+    print(f"\n{'=' * 50}")
+    print("  INFORMAÇÕES DO SISTEMA")
+    print(f"{'=' * 50}")
+    print(f"  CPUs:           {info['cpu_count']}")
+    print(f"  RAM total:      {info.get('ram_total_gb', 'N/A')} GB")
+    print(f"  RAM disponível: {info.get('ram_disponivel_gb', 'N/A')} GB")
+    print(f"  CUDA:           {'Sim' if info['cuda_disponivel'] else 'Não'}")
 
-    # Comparativo
-    args.resultados = "docs/"
-    cmd_comparar(args)
+    for gpu in info.get("gpus", []):
+        print(f"  GPU {gpu['indice']}:         {gpu['nome']}")
+        print(f"    VRAM total:   {gpu['vram_total_gb']} GB")
+        print(f"    VRAM livre:   {gpu['vram_livre_gb']} GB")
+
+    print(f"\n  CONFIG DE RECURSOS:")
+    print(f"    Dispositivo:       {cfg_rec.get('dispositivo', 'auto')}")
+    print(f"    Max GPU memória:   {cfg_rec.get('max_gpu_memoria_gb', 'sem limite')}")
+    print(f"    Mixed precision:   {cfg_rec.get('mixed_precision', True)}")
+    print(f"    Num workers:       {cfg_rec.get('num_workers', 'auto')}")
+
+    print(f"\n  DATASETS DISPONÍVEIS:")
+    carregador = CarregadorDataset()
+    for ds in ["sdss", "decals"]:
+        versoes = carregador.listar_versoes_disponiveis(ds)
+        print(f"    {ds}: {', '.join(versoes)}")
+
+    print(f"\n  EXPERIMENTOS PRÉ-DEFINIDOS:")
+    for exp in listar_experimentos(config):
+        dados = obter_experimento(exp, config)
+        modelos = dados.get("modelos", [])
+        datasets = dados.get("datasets", [dados.get("treinar_em", "?")])
+        versao = dados.get("versao_dataset", "raw")
+        print(f"    {exp}: {', '.join(modelos)} | {', '.join(datasets)} ({versao})")
+
+    print()
 
 
-def cmd_comparar(args: argparse.Namespace) -> None:
-    """Lê resultados salvos e gera tabela comparativa."""
+def _acao_historico(config: dict) -> None:
+    """Mostra histórico de runs."""
+    from utils.experimento import carregar_historico_todos
+
+    todos = carregar_historico_todos(Path("pesos"))
+    if not todos:
+        print("Nenhum histórico de runs encontrado.")
+        return
+
+    print(f"\n{'=' * 80}")
+    print("  HISTÓRICO DE RUNS")
+    print(f"{'=' * 80}")
+
+    for modelo, runs in todos.items():
+        print(f"\n  {modelo.upper()} ({len(runs)} runs):")
+        print(f"  {'─' * 76}")
+        for run in runs:
+            nome = run.get("nome_experimento", "?")
+            ts = run.get("timestamp", "?")[:19]
+            acc = run.get("melhor_val_acc")
+            epocas = run.get("epocas_totais", "?")
+            parou = run.get("parou_cedo", False)
+            acc_str = f"{acc:.4f}" if acc is not None else "N/A"
+            es_str = " (early stop)" if parou else ""
+            print(f"    {ts} | acc={acc_str} | ep={epocas}{es_str} | {nome}")
+
+    print()
+
+
+def _acao_comparar(config: dict) -> None:
+    """Compara resultados salvos em docs/."""
     import re
-    from utils.metricas import ResultadoAvaliacao, CLASSES_GALAXY10
-    from utils.visualizacao import plotar_comparativo_modelos
     import numpy as np
+    from utils.metricas import ResultadoAvaliacao
+    from utils.visualizacao import plotar_comparativo_modelos
 
-    dir_docs = Path(args.resultados if hasattr(args, "resultados") else "docs")
+    dir_docs = Path("docs")
     resultados: dict[str, ResultadoAvaliacao] = {}
 
-    for arq_resultado in sorted(dir_docs.glob("*/resultados.md")):
-        nome_modelo = arq_resultado.parent.name
-        conteudo = arq_resultado.read_text(encoding="utf-8")
-        # Extrai acurácia do markdown gerado por formatar_para_markdown
+    for arq in sorted(dir_docs.glob("*/resultados.md")):
+        nome_modelo = arq.parent.name
+        conteudo = arq.read_text(encoding="utf-8")
         match_acc = re.search(r"Acurácia Top-1 \| ([\d.]+)", conteudo)
         match_f1 = re.search(r"F1 Macro \| ([\d.]+)", conteudo)
         if match_acc:
-            from utils.metricas import ResultadoAvaliacao
-            import numpy as np
             resultado = ResultadoAvaliacao(
                 acuracia=float(match_acc.group(1)),
                 acuracia_top5=None,
@@ -234,13 +408,14 @@ def cmd_comparar(args: argparse.Namespace) -> None:
         print("Nenhum resultado encontrado em docs/*/resultados.md")
         return
 
-    # Tabela comparativa
     dir_comp = dir_docs / "comparativo"
     dir_comp.mkdir(exist_ok=True)
 
-    linhas = ["# Comparativo de Modelos\n\n",
-              "| Modelo | Acurácia Top-1 | F1 Macro |\n",
-              "|--------|---------------|----------|\n"]
+    linhas = [
+        "# Comparativo de Modelos\n\n",
+        "| Modelo | Acurácia Top-1 | F1 Macro |\n",
+        "|--------|---------------|----------|\n",
+    ]
     for nome, r in sorted(resultados.items(), key=lambda x: -x[1].acuracia):
         linhas.append(f"| {nome} | {r.acuracia:.4f} | {r.f1_macro:.4f} |\n")
     linhas.append(f"\n**Referência Astroformer:** ~0.9486 (DECaLS)\n")
@@ -253,86 +428,120 @@ def cmd_comparar(args: argparse.Namespace) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Parser principal
+# Helpers
 # ---------------------------------------------------------------------------
 
-def _criar_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="galaxy-classification",
-        description="Classificação morfológica de galáxias — Galaxy10 SDSS/DECaLS",
-    )
-    parser.add_argument("--seed", type=int, default=42, help="Semente global")
-    parser.add_argument("--dispositivo", choices=["auto", "cuda", "cpu"], default="auto")
-    parser.add_argument("--verbose", action="store_true")
 
-    sub = parser.add_subparsers(dest="comando", required=True)
+def _importar_treinar(modelo: str):
+    """Importa dinamicamente a funcao treinar() de um modelo."""
+    modulo = __import__(f"modelos.{modelo}.treino", fromlist=["treinar"])
+    return modulo.treinar
 
-    # preprocessar
-    p_pre = sub.add_parser("preprocessar", help="Pré-processa o dataset")
-    p_pre.add_argument("--dataset", required=True, choices=["sdss", "decals"])
-    p_pre.add_argument("--tecnica", default="smote",
-                       choices=["smote", "adasyn", "oversampling", "undersampling", "hibrido", "aumento"])
-    p_pre.add_argument("--fator", type=int, default=2, help="Fator de multiplicação (só para aumento)")
-    p_pre.add_argument("--saida", default="dataset/processados", help="Diretório de saída")
-    p_pre.add_argument("--seed", type=int, default=42)
 
-    # treinar
-    p_train = sub.add_parser("treinar", help="Treina um modelo")
-    p_train.add_argument("--modelo", required=True,
-                         choices=["cnn", "resnet50", "efficientnet", "vgg16", "vit", "dino", "multimodal"])
-    p_train.add_argument("--dataset", choices=["sdss", "decals"])
-    p_train.add_argument("--epocas", type=int)
-    p_train.add_argument("--batch-size", dest="batch_size", type=int)
-    p_train.add_argument("--seed", type=int)
+def _importar_avaliar(modelo: str):
+    """Importa dinamicamente a funcao avaliar() de um modelo."""
+    modulo = __import__(f"modelos.{modelo}.avaliacao", fromlist=["avaliar"])
+    return modulo.avaliar
 
-    # avaliar
-    p_eval = sub.add_parser("avaliar", help="Avalia um modelo")
-    p_eval.add_argument("--modelo", required=True,
-                        choices=["cnn", "resnet50", "efficientnet", "vgg16", "vit", "dino", "multimodal"])
-    p_eval.add_argument("--pesos", required=True, help="Caminho do arquivo .pth")
-    p_eval.add_argument("--dataset", choices=["sdss", "decals"])
 
-    # explicar
-    p_xai = sub.add_parser("explicar", help="Gera visualização XAI")
-    p_xai.add_argument("--modelo", required=True,
-                       choices=["cnn", "resnet50", "efficientnet", "vgg16", "vit", "dino", "multimodal"])
-    p_xai.add_argument("--pesos", required=True)
-    p_xai.add_argument("--imagem", required=True, help="Caminho da imagem PNG/JPG")
-    p_xai.add_argument("--classe-alvo", dest="classe_alvo", type=int, default=None)
-    p_xai.add_argument("--saida", default=None, help="Caminho da imagem XAI de saída")
+def _encontrar_pesos_recentes(modelo: str) -> Path | None:
+    """Retorna o .pth mais recente de um modelo."""
+    dir_pesos = Path("pesos") / modelo
+    if not dir_pesos.exists():
+        return None
+    arquivos = sorted(dir_pesos.glob("*.pth"), key=lambda p: p.stat().st_mtime, reverse=True)
+    return arquivos[0] if arquivos else None
 
-    # benchmark
-    p_bench = sub.add_parser("benchmark", help="Treina e avalia múltiplos modelos")
-    p_bench.add_argument("--modelos", required=True, help="Lista separada por vírgulas: cnn,resnet50,vit")
-    p_bench.add_argument("--dataset", choices=["sdss", "decals"])
-    p_bench.add_argument("--epocas", type=int)
-    p_bench.add_argument("--seed", type=int)
 
-    # comparar
-    p_comp = sub.add_parser("comparar", help="Compara resultados salvos em docs/")
-    p_comp.add_argument("--resultados", default="docs/", help="Diretório com subpastas de modelos")
+def _rodar_experimento(config: dict, nome_exp: str) -> None:
+    """Roda um experimento pre-definido do config.yaml."""
+    exp = obter_experimento(nome_exp, config)
+    modelos = exp.get("modelos", [])
+    datasets = exp.get("datasets", [])
+    treinar_em = exp.get("treinar_em")
+    avaliar_em = exp.get("avaliar_em")
+    versao = exp.get("versao_dataset", "raw")
 
-    return parser
+    if treinar_em:
+        # Cross-dataset experiment
+        datasets = [treinar_em]
+
+    print(f"\n{'=' * 60}")
+    print(f"  EXPERIMENTO: {nome_exp}")
+    print(f"  Modelos: {', '.join(modelos)}")
+    print(f"  Datasets: {', '.join(datasets)} ({versao})")
+    if avaliar_em:
+        print(f"  Cross-dataset: avaliar em {avaliar_em}")
+    print(f"{'=' * 60}\n")
+
+    confirmar = inquirer.confirm(message="Iniciar?", default=True).execute()
+    if not confirmar:
+        return
+
+    for modelo in modelos:
+        for dataset in datasets:
+            print(f"\n--- {modelo.upper()} em {dataset} ({versao}) ---")
+            override = {"dataset": dataset, "versao_dataset": versao}
+            treinar_fn = _importar_treinar(modelo)
+            historico = treinar_fn(config_override=override)
+            print(f"  {historico.resumo()}")
+
+            if avaliar_em:
+                print(f"  Avaliando cross-dataset em {avaliar_em}...")
+                pesos = _encontrar_pesos_recentes(modelo)
+                if pesos:
+                    avaliar_fn = _importar_avaliar(modelo)
+                    avaliar_fn(pesos, config_override={"dataset_teste": avaliar_em})
+
+
+# ---------------------------------------------------------------------------
+# Menu principal
+# ---------------------------------------------------------------------------
 
 
 def main() -> None:
-    parser = _criar_parser()
-    args = parser.parse_args()
-
     import logging
-    configurar_logger_global(logging.DEBUG if args.verbose else logging.INFO)
 
-    fixar_semente(args.seed)
+    configurar_logger_global(logging.INFO)
 
-    cmds = {
-        "preprocessar": cmd_preprocessar,
-        "treinar": cmd_treinar,
-        "avaliar": cmd_avaliar,
-        "explicar": cmd_explicar,
-        "benchmark": cmd_benchmark,
-        "comparar": cmd_comparar,
-    }
-    cmds[args.comando](args)
+    config = carregar_config()
+    fixar_semente(config.get("global", {}).get("seed", 42))
+
+    print()
+    print("=" * 50)
+    print("  Galaxy10 Classification")
+    print("=" * 50)
+    print()
+
+    while True:
+        acao = inquirer.select(
+            message="O que deseja fazer?",
+            choices=[
+                {"name": "Treinar modelos", "value": "treinar"},
+                {"name": "Avaliar modelo", "value": "avaliar"},
+                {"name": "Pré-processar dataset", "value": "preprocessar"},
+                {"name": "Gerar XAI (explicabilidade)", "value": "explicar"},
+                {"name": "Comparar resultados", "value": "comparar"},
+                {"name": "Ver histórico de runs", "value": "historico"},
+                {"name": "Ver informações do sistema", "value": "info"},
+                Separator(),
+                {"name": "Sair", "value": "sair"},
+            ],
+        ).execute()
+
+        if acao == "sair":
+            break
+
+        acoes = {
+            "treinar": _acao_treinar,
+            "avaliar": _acao_avaliar,
+            "preprocessar": _acao_preprocessar,
+            "explicar": _acao_explicar,
+            "comparar": _acao_comparar,
+            "historico": _acao_historico,
+            "info": _acao_info,
+        }
+        acoes[acao](config)
 
 
 if __name__ == "__main__":

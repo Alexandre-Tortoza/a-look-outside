@@ -3,58 +3,59 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import torch
-import torch.nn as nn
 
-from dataset.carregador import CarregadorDataset
+from dataset.carregador import CarregadorDataset, resolver_nome_dataset
 from dataset.dataset_pytorch import criar_dataloaders
 from modelos._transfer_learning import treinar_two_stage
-from modelos.dino import config as cfg
-from modelos.dino.modelo import DinoGalaxy, _ModeloDinoScratch
+from modelos.dino.modelo import DinoGalaxy
 from modelos.treinador import HistoricoTreino
 from pre_processamento.divisao_treino_teste import dividir_estratificado
 from pre_processamento.normalizacao import obter_transform_avaliacao, obter_transform_treino
+from utils.config_loader import carregar_config, obter_config_modelo, obter_config_recursos
+from utils.experimento import gerar_nome_experimento
 from utils.logger import obter_logger
+from utils.recursos import aplicar_batch_cap, configurar_dispositivo, obter_num_workers, usar_mixed_precision
 from utils.reproducibilidade import fixar_semente
 
 
 def ajustar_fino(
     caminho_pesos_pretreino: Optional[Path] = None,
-    config_override: Optional[dict] = None,
+    config_override: Optional[dict[str, Any]] = None,
 ) -> HistoricoTreino:
-    """Fine-tuning supervisionado do backbone DINO.
+    """Fine-tuning supervisionado do backbone DINO."""
+    config = carregar_config()
+    params = obter_config_modelo("dino", config)
+    cfg_rec = obter_config_recursos(config)
 
-    Se caminho_pesos_pretreino for None e MODO_DINO = "hub",
-    usa o DINOv2 pré-treinado diretamente do torch.hub.
-
-    Args:
-        caminho_pesos_pretreino: Pesos do backbone pré-treinado (.pth).
-                                 None para usar DINOv2 hub.
-        config_override: Sobrescreve parâmetros do config.
-
-    Returns:
-        HistoricoTreino do fine-tuning.
-    """
-    params = {
-        "dataset": cfg.DATASET, "seed": cfg.SEED,
-        "epocas": cfg.EPOCAS_AJUSTE_FINO, "batch_size": cfg.BATCH_SIZE_AJUSTE_FINO,
-        "lr_cabeca": cfg.LR_AJUSTE_FINO, "lr_backbone": cfg.LR_BACKBONE_AJUSTE,
-        "epocas_congelado": cfg.EPOCAS_CONGELADO, "tamanho_imagem": cfg.TAMANHO_IMAGEM,
-        "num_workers": cfg.NUM_WORKERS, "paciencia_early_stop": cfg.PACIENCIA_EARLY_STOP,
-        "scheduler_ativo": cfg.SCHEDULER_ATIVO, "peso_decay": cfg.PESO_DECAY,
-        "salvar_pesos": cfg.SALVAR_PESOS, "nome_experimento": cfg.NOME_EXPERIMENTO,
-        "modo": cfg.MODO_DINO, "backbone_hub": cfg.BACKBONE_DINO,
-        "backbone_scratch": cfg.BACKBONE_SCRATCH,
-    }
     if config_override:
         params.update(config_override)
+
+    dataset = params.get("dataset", "decals")
+    versao = params.get("versao_dataset", "raw")
+    params.setdefault("versao_dataset", versao)
+
+    # DINO usa epocas_ajuste_fino como default de epocas
+    params.setdefault("epocas", params.get("epocas_ajuste_fino", 30))
+    params.setdefault("lr_cabeca", params.get("lr_cabeca", 1e-4))
+    params.setdefault("lr_backbone", params.get("lr_backbone", 1e-5))
+
+    num_workers = obter_num_workers(cfg_rec)
+    batch_size = aplicar_batch_cap(params.get("batch_size", 32), cfg_rec)
+    params["batch_size"] = batch_size
+
+    nome_exp = params.get("nome_experimento") or gerar_nome_experimento(
+        "dino", dataset, versao, params["epocas"]
+    )
+    params["nome_experimento"] = nome_exp
 
     log = obter_logger(__name__, arquivo_log=Path("docs/dino/ajuste_fino.log"))
     fixar_semente(params["seed"])
 
-    imagens, rotulos = CarregadorDataset().carregar(params["dataset"])
+    nome_dataset = resolver_nome_dataset(dataset, versao)
+    imagens, rotulos = CarregadorDataset().carregar(nome_dataset)
     divisao = dividir_estratificado(imagens, rotulos, semente=params["seed"])
     num_classes = len(set(rotulos.tolist()))
 
@@ -62,31 +63,36 @@ def ajustar_fino(
         divisao,
         obter_transform_treino(tamanho_imagem=params["tamanho_imagem"]),
         obter_transform_avaliacao(tamanho_imagem=params["tamanho_imagem"]),
-        params["batch_size"], params["num_workers"],
+        batch_size, num_workers,
     )
 
     classificador = DinoGalaxy(
-        modo=params["modo"],
-        backbone_hub=params["backbone_hub"],
-        backbone_scratch=params["backbone_scratch"],
+        modo=params.get("modo", "hub"),
+        backbone_hub=params.get("backbone", "dinov2_vitb14"),
+        backbone_scratch=params.get("backbone_scratch", "vit_small_patch16_224"),
     )
     rede = classificador.construir(num_classes=num_classes, tamanho_imagem=params["tamanho_imagem"])
 
-    # Carrega pesos do pré-treino se fornecidos
     if caminho_pesos_pretreino is not None and caminho_pesos_pretreino.exists():
         backbone = getattr(rede, "backbone", rede)
         backbone.load_state_dict(torch.load(caminho_pesos_pretreino, map_location="cpu"))
         log.info("Backbone carregado de %s", caminho_pesos_pretreino)
 
-    dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dispositivo = configurar_dispositivo(cfg_rec)
+    amp = usar_mixed_precision(cfg_rec, dispositivo)
+
     return treinar_two_stage(
-        rede=rede, nome_experimento=params["nome_experimento"],
+        rede=rede, nome_experimento=nome_exp,
         loader_treino=loader_treino, loader_val=loader_val,
-        epocas_total=params["epocas"], epocas_congelado=params["epocas_congelado"],
+        epocas_total=params["epocas"],
+        epocas_congelado=params.get("epocas_congelado", 5),
         lr_cabeca=params["lr_cabeca"], lr_backbone=params["lr_backbone"],
-        paciencia=params["paciencia_early_stop"], salvar_checkpoints=params["salvar_pesos"],
-        scheduler_ativo=params["scheduler_ativo"], peso_decay=params["peso_decay"],
-        dispositivo=dispositivo, dir_pesos=Path("pesos"), dir_docs=Path("docs"), logger=log,
+        paciencia=params.get("paciencia_early_stop", 10),
+        salvar_checkpoints=params.get("salvar_pesos", True),
+        scheduler_ativo=params.get("scheduler_ativo", True),
+        peso_decay=params.get("peso_decay", 1e-4),
+        dispositivo=dispositivo, dir_pesos=Path("pesos"), dir_docs=Path("docs"),
+        usar_amp=amp, params=params, logger=log,
     )
 
 

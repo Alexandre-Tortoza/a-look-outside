@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import torch
 import torch.nn as nn
@@ -13,7 +13,10 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data import DataLoader
 
+from utils.checkpoint import salvar_checkpoint
+from utils.experimento import registrar_run
 from utils.logger import obter_logger
+from utils.recursos import configurar_dispositivo, usar_mixed_precision
 from utils.visualizacao import plotar_curva_treino
 
 
@@ -43,14 +46,14 @@ class TreinadorModelo:
     Suporta:
     - AdamW + CosineAnnealingLR
     - Early stopping por val_acc
-    - Checkpoint best-only (.pth)
-    - AMP (mixed precision) quando CUDA disponível
-    - Logging via logger injetado
+    - Checkpoint rico (.pth + .json com metadata)
+    - AMP (mixed precision) configurável
+    - Gestão automática de dispositivo via config de recursos
 
     Args:
         epocas: Número máximo de épocas.
         lr: Learning rate inicial.
-        dispositivo: "auto" | "cuda" | "cpu".
+        config_recursos: Dict da seção ``recursos`` do config.yaml.
         dir_pesos: Diretório base para salvar checkpoints.
         dir_docs: Diretório base para salvar curvas de treino.
         paciencia_early_stop: Épocas sem melhora antes de parar.
@@ -64,7 +67,7 @@ class TreinadorModelo:
         self,
         epocas: int = 50,
         lr: float = 1e-4,
-        dispositivo: str = "auto",
+        config_recursos: Optional[dict[str, Any]] = None,
         dir_pesos: Path = Path("pesos"),
         dir_docs: Path = Path("docs"),
         paciencia_early_stop: int = 10,
@@ -83,12 +86,9 @@ class TreinadorModelo:
         self.peso_decay = peso_decay
         self._log = logger or obter_logger(__name__)
 
-        if dispositivo == "auto":
-            self.dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            self.dispositivo = torch.device(dispositivo)
-
-        self._usar_amp = self.dispositivo.type == "cuda"
+        cfg_rec = config_recursos or {}
+        self.dispositivo = configurar_dispositivo(cfg_rec)
+        self._usar_amp = usar_mixed_precision(cfg_rec, self.dispositivo)
         self._log.info("Dispositivo: %s | AMP: %s", self.dispositivo, self._usar_amp)
 
     # ------------------------------------------------------------------
@@ -101,6 +101,7 @@ class TreinadorModelo:
         nome_experimento: str,
         loader_treino: DataLoader,
         loader_val: DataLoader,
+        params: Optional[dict[str, Any]] = None,
     ) -> HistoricoTreino:
         """Executa o loop completo de treino.
 
@@ -109,6 +110,7 @@ class TreinadorModelo:
             nome_experimento: Nome descritivo usado para nomear arquivos salvos.
             loader_treino: DataLoader do conjunto de treino.
             loader_val: DataLoader do conjunto de validação.
+            params: Hiperparâmetros para salvar no checkpoint e histórico.
 
         Returns:
             HistoricoTreino com todas as métricas por época.
@@ -149,7 +151,7 @@ class TreinadorModelo:
                 historico.melhor_val_acc = acc_v
                 sem_melhora = 0
                 if self.salvar_checkpoints:
-                    self._salvar(rede, caminho_pesos)
+                    salvar_checkpoint(rede, caminho_pesos, params=params, historico=historico)
                     self._log.info("  ✓ Melhor modelo salvo (val_acc=%.4f)", acc_v)
             else:
                 sem_melhora += 1
@@ -168,6 +170,11 @@ class TreinadorModelo:
             historico.accs_val,
             caminho_saida=dir_modelo / "curva_treino.png",
         )
+
+        # Registra run no historico
+        nome_modelo = nome_experimento.split("_")[0]
+        registrar_run(self.dir_pesos, nome_modelo, nome_experimento, params or {}, historico)
+
         self._log.info("Treino concluído. %s", historico.resumo())
         return historico
 
@@ -242,6 +249,3 @@ class TreinadorModelo:
         pasta = self.dir_pesos / nome_modelo
         pasta.mkdir(parents=True, exist_ok=True)
         return pasta / f"{nome_experimento}.pth"
-
-    def _salvar(self, rede: nn.Module, caminho: Path) -> None:
-        torch.save(rede.state_dict(), caminho)

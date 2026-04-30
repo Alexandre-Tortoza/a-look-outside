@@ -13,9 +13,28 @@ _log = logging.getLogger(__name__)
 
 # Mapeamento de nomes lógicos para subpastas dentro de dataset/raw/
 _NOMES_RAW = {
-    "sdss": "raw/sdss/galaxy10_sdss.h5",
-    "decals": "raw/decals/galaxy10_decals.h5",
+    "sdss": "./raw/raw-sdss.h5",
+    # "decals": "raw/decals/galaxy10_decals.h5",
 }
+
+
+def resolver_nome_dataset(dataset: str, versao: str = "raw") -> str:
+    """Compoe o nome logico do dataset a partir de nome + versao.
+
+    Args:
+        dataset: ``"sdss"`` ou ``"decals"``.
+        versao: ``"raw"`` para original, ou nome da versao preprocessada
+                (ex: ``"smote"``, ``"undersampling"``, ``"aumento"``).
+
+    Returns:
+        Nome logico para passar a ``CarregadorDataset.carregar()``.
+        Se versao == "raw", retorna o dataset original.
+        Senao, retorna ``"{dataset}_{versao}"`` que resolve para
+        ``dataset/processados/{dataset}_{versao}.h5``.
+    """
+    if versao == "raw":
+        return dataset
+    return f"{dataset}_{versao}"
 
 
 class CarregadorDataset:
@@ -80,6 +99,24 @@ class CarregadorDataset:
             imagens, rotulos = dados["imagens"], dados["rotulos"].astype(np.int64)
         _log.info("Carregado: %d amostras, shape imagens %s.", len(rotulos), imagens.shape)
         return imagens, rotulos
+
+    def listar_versoes_disponiveis(self, dataset: str) -> list[str]:
+        """Lista versoes preprocessadas disponiveis para um dataset.
+
+        Busca arquivos em ``dataset/processados/{dataset}_*.h5``.
+
+        Returns:
+            Lista de versoes (ex: ``["raw", "smote", "aumento"]``).
+        """
+        versoes = ["raw"]
+        dir_processados = self.raiz / "processados"
+        if dir_processados.exists():
+            for arq in sorted(dir_processados.glob(f"{dataset}_*.h5")):
+                # Extrai versao: "decals_smote.h5" -> "smote"
+                sufixo = arq.stem.replace(f"{dataset}_", "", 1)
+                if sufixo:
+                    versoes.append(sufixo)
+        return versoes
 
     def inspecionar(self, nome: str) -> dict:
         """Retorna metadados sem carregar todos os dados na memória.

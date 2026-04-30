@@ -1,0 +1,124 @@
+# ============================================================
+# RECURSOS DE HARDWARE
+# ============================================================
+recursos:
+  dispositivo: "auto"             # "auto" | "cuda" | "cuda:0" | "cuda:1" | "cpu"
+  max_gpu_memoria_gb: null        # null = sem limite, ou ex: 8.0 para cap de VRAM
+  num_workers: 4                  # workers do DataLoader (null = auto: min(cpu_count, 8))
+  pin_memory: true
+  mixed_precision: true           # AMP automatico quando em GPU
+  max_batch_em_memoria: null      # null = usa batch_size do modelo, ou valor para cap
+
+# ============================================================
+# GLOBAL — aplica a todos os modelos, sobrescrito por secao especifica
+# ============================================================
+global:
+  seed: 42
+  epocas: 50
+  batch_size: 32
+  tamanho_imagem: 224
+  paciencia_early_stop: 10
+  scheduler_ativo: true
+  peso_decay: 1.0e-4
+  salvar_pesos: true
+  habilitar_xai: false
+
+# ============================================================
+# MODELOS — herda do global, sobrescreve o que precisar
+# ============================================================
+modelos:
+  cnn:
+    lr: 1.0e-3
+
+  resnet50:
+    lr_cabeca: 1.0e-3
+    lr_backbone: 1.0e-4
+    epocas_congelado: 5
+    pretrained: true
+
+  efficientnet:
+    lr_cabeca: 1.0e-3
+    lr_backbone: 1.0e-4
+    epocas_congelado: 5
+    variante_backbone: "efficientnet_b0"
+    pretrained: true
+
+  vgg16:
+    lr_cabeca: 1.0e-3
+    lr_backbone: 1.0e-4
+    epocas_congelado: 5
+    batch_size: 16                # VGG16 pesado, batch menor
+    pretrained: true
+
+  vit:
+    lr_cabeca: 1.0e-3
+    lr_backbone: 1.0e-5
+    epocas_congelado: 10
+    backbone: "vit_base_patch16_224"
+    pretrained: true
+
+  dino:
+    modo: "hub"                   # "hub" | "pre_treino"
+    backbone: "dinov2_vitb14"
+    lr_cabeca: 1.0e-3
+    lr_backbone: 1.0e-5
+    epocas_congelado: 5
+    # pre-treino (so usado se modo == "pre_treino")
+    epocas_pre_treino: 100
+    epocas_ajuste_fino: 30
+    tamanho_projecao: 65536
+    temperatura_professor: 0.04
+    temperatura_aluno: 0.1
+
+  multimodal:
+    lr_cabeca: 1.0e-3
+    lr_backbone: 1.0e-4
+    epocas_congelado: 5
+    dim_visual: 256
+    dim_tabular: 256
+    dim_fusao: 512
+    dropout_fusao: 0.4
+    dropout_tabular: 0.3
+    features_tabulares: ["ra", "dec", "redshift", "mag_r", "mag_g", "mag_z"]
+    pretrained: true
+
+# ============================================================
+# EXPERIMENTOS — combinacoes pre-definidas para rodar via CLI
+# ============================================================
+experimentos:
+  baseline_decals:
+    modelos: [cnn, resnet50, efficientnet, vgg16, vit, dino]
+    datasets: [decals]
+    versao_dataset: raw
+
+  baseline_sdss:
+    modelos: [cnn, resnet50, efficientnet, vgg16, vit]
+    datasets: [sdss]
+    versao_dataset: raw
+
+  balanceado_smote:
+    modelos: [cnn, resnet50, vit]
+    datasets: [decals]
+    versao_dataset: smote
+
+  balanceado_undersampling:
+    modelos: [cnn, resnet50, vit]
+    datasets: [decals]
+    versao_dataset: undersampling
+
+  aumento_dados:
+    modelos: [cnn, resnet50, vit]
+    datasets: [decals]
+    versao_dataset: aumento
+
+  cross_sdss_para_decals:
+    modelos: [resnet50, vit]
+    treinar_em: sdss
+    avaliar_em: decals
+    versao_dataset: raw
+
+  cross_decals_para_sdss:
+    modelos: [resnet50, vit]
+    treinar_em: decals
+    avaliar_em: sdss
+    versao_dataset: raw

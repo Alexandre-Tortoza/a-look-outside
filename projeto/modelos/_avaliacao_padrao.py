@@ -3,71 +3,103 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 
-from dataset.carregador import CarregadorDataset
-from dataset.dataset_pytorch import criar_dataloaders
+from dataset.carregador import CarregadorDataset, resolver_nome_dataset
+from dataset.dataset_pytorch import DatasetGalaxias, criar_dataloaders
 from modelos.base import ClassificadorGalaxias
 from pre_processamento.divisao_treino_teste import dividir_estratificado
 from pre_processamento.normalizacao import obter_transform_avaliacao, obter_transform_treino
+from utils.checkpoint import carregar_checkpoint
+from utils.config_loader import carregar_config, obter_config_modelo, obter_config_recursos
 from utils.logger import obter_logger
 from utils.metricas import CLASSES_GALAXY10, ResultadoAvaliacao, calcular_metricas, formatar_para_markdown
+from utils.recursos import configurar_dispositivo, obter_num_workers
 from utils.reproducibilidade import fixar_semente
 from utils.visualizacao import plotar_matriz_confusao
+
+
+def preparar_loader_teste(
+    params: dict[str, Any],
+    carregador: CarregadorDataset,
+    transform_val,
+    num_workers: int,
+) -> tuple[DataLoader, np.ndarray]:
+    """Prepara o DataLoader de teste, com suporte a cross-dataset.
+
+    Se ``dataset_teste`` estiver em params, carrega esse dataset inteiro como teste.
+    Senao, faz o split estratificado normal e retorna o loader de teste.
+
+    Returns:
+        (loader_teste, rotulos_originais_completo) — rotulos para contar num_classes.
+    """
+    dataset_teste = params.get("dataset_teste")
+
+    if dataset_teste:
+        # Cross-dataset: carrega dataset inteiro como teste
+        imgs_teste, rots_teste = carregador.carregar(dataset_teste)
+        ds_teste = DatasetGalaxias(imgs_teste, rots_teste, transform_val)
+        loader = DataLoader(ds_teste, batch_size=params.get("batch_size", 32),
+                            num_workers=num_workers, shuffle=False)
+        return loader, rots_teste
+
+    # Normal: split do dataset de treino
+    dataset = params.get("dataset", "decals")
+    versao = params.get("versao_dataset", "raw")
+    nome_dataset = resolver_nome_dataset(dataset, versao)
+    imagens, rotulos = carregador.carregar(nome_dataset)
+    divisao = dividir_estratificado(imagens, rotulos, semente=params.get("seed", 42))
+    _, _, loader_teste = criar_dataloaders(
+        divisao,
+        obter_transform_treino(tamanho_imagem=params.get("tamanho_imagem", 224), aumentar=False),
+        transform_val,
+        batch_size=params.get("batch_size", 32),
+        num_workers=num_workers,
+    )
+    return loader_teste, rotulos
 
 
 def avaliar_modelo(
     classificador: ClassificadorGalaxias,
     caminho_pesos: Path,
-    dataset: str,
-    tamanho_imagem: int,
-    batch_size: int,
-    seed: int,
-    num_workers: int,
-    nome_experimento: str,
-    num_classes: int = 10,
+    params: dict[str, Any],
 ) -> ResultadoAvaliacao:
     """Avaliação genérica aplicável a qualquer ClassificadorGalaxias.
 
     Args:
         classificador: Instância de ClassificadorGalaxias.
         caminho_pesos: Arquivo .pth com pesos.
-        dataset: Nome do dataset ("sdss" | "decals").
-        tamanho_imagem: Tamanho de entrada.
-        batch_size: Tamanho do batch para inferência.
-        seed: Semente para reprodutibilidade.
-        num_workers: Workers do DataLoader.
-        nome_experimento: Usado para nomear arquivos de saída.
-        num_classes: Número de classes.
-
-    Returns:
-        ResultadoAvaliacao completo.
+        params: Dict com dataset, tamanho_imagem, batch_size, seed, num_workers, etc.
     """
+    config = carregar_config()
+    cfg_rec = obter_config_recursos(config)
+
     nome_modelo = classificador.nome.lower()
     dir_docs = Path("docs") / nome_modelo
     log = obter_logger(__name__, arquivo_log=dir_docs / "avaliacao.log")
 
-    fixar_semente(seed)
+    fixar_semente(params.get("seed", 42))
 
-    carregador = CarregadorDataset()
-    imagens, rotulos = carregador.carregar(dataset)
-    divisao = dividir_estratificado(imagens, rotulos, semente=seed)
+    num_workers = obter_num_workers(cfg_rec)
+    tamanho_imagem = params.get("tamanho_imagem", 224)
+    num_classes = params.get("num_classes", 10)
 
     transform_val = obter_transform_avaliacao(tamanho_imagem=tamanho_imagem)
-    _, _, loader_teste = criar_dataloaders(
-        divisao,
-        obter_transform_treino(tamanho_imagem=tamanho_imagem, aumentar=False),
-        transform_val,
-        batch_size=batch_size,
-        num_workers=num_workers,
-    )
 
+    carregador = CarregadorDataset()
+    loader_teste, rotulos_ref = preparar_loader_teste(params, carregador, transform_val, num_workers)
+
+    num_classes = len(set(rotulos_ref.tolist()))
     rede = classificador.construir(num_classes=num_classes, tamanho_imagem=tamanho_imagem)
-    rede.load_state_dict(torch.load(caminho_pesos, map_location="cpu"))
-    dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Carregar checkpoint (backward-compatible)
+    carregar_checkpoint(caminho_pesos, rede)
+
+    dispositivo = configurar_dispositivo(cfg_rec)
     rede = rede.to(dispositivo).eval()
     log.info("Avaliando %s com pesos de %s", classificador, caminho_pesos)
 
@@ -84,10 +116,11 @@ def avaliar_modelo(
     y_pred = np.array(todos_pred)
     y_logits = np.concatenate(todos_logits)
 
+    nome_exp = params.get("nome_experimento", nome_modelo)
     resultado = calcular_metricas(
         y_true, y_pred, y_logits,
         nome_modelo=classificador.nome,
-        nome_experimento=nome_experimento,
+        nome_experimento=nome_exp,
     )
     log.info("Acurácia: %.4f | F1: %.4f", resultado.acuracia, resultado.f1_macro)
 
@@ -107,16 +140,13 @@ def inferir_modelo(
     num_classes: int = 10,
     tamanho_imagem: int = 224,
 ) -> tuple[int, float, np.ndarray]:
-    """Inferência de imagem única genérica.
+    """Inferência de imagem única genérica."""
+    config = carregar_config()
+    cfg_rec = obter_config_recursos(config)
+    dispositivo = configurar_dispositivo(cfg_rec)
 
-    Returns:
-        (classe_prevista, confiança, logits)
-    """
-    from pre_processamento.normalizacao import obter_transform_avaliacao
-
-    dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     rede = classificador.construir(num_classes=num_classes, tamanho_imagem=tamanho_imagem)
-    rede.load_state_dict(torch.load(caminho_pesos, map_location="cpu"))
+    carregar_checkpoint(caminho_pesos, rede)
     rede = rede.to(dispositivo).eval()
 
     transform = obter_transform_avaliacao(tamanho_imagem=tamanho_imagem)

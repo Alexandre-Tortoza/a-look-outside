@@ -8,16 +8,16 @@ from typing import Optional
 import numpy as np
 import torch
 
-from modelos.cnn import config as cfg
 from modelos.cnn.modelo import RedeCNNBaseline
 from pre_processamento.normalizacao import obter_transform_avaliacao
+from utils.checkpoint import carregar_checkpoint
 
 
 def inferir(
     imagem: np.ndarray,
     caminho_pesos: Path,
     num_classes: int = 10,
-    tamanho_imagem: int = cfg.TAMANHO_IMAGEM,
+    tamanho_imagem: int = 224,
 ) -> tuple[int, float, np.ndarray]:
     """Classifica uma única imagem.
 
@@ -33,7 +33,7 @@ def inferir(
     dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     rede = RedeCNNBaseline(num_classes=num_classes)
-    rede.load_state_dict(torch.load(caminho_pesos, map_location="cpu"))
+    carregar_checkpoint(caminho_pesos, rede)
     rede = rede.to(dispositivo).eval()
 
     transform = obter_transform_avaliacao(tamanho_imagem=tamanho_imagem)

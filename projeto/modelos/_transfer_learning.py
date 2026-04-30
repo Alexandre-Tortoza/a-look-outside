@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import torch
 import torch.nn as nn
@@ -12,6 +12,8 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data import DataLoader
 
+from utils.checkpoint import salvar_checkpoint
+from utils.experimento import registrar_run
 from utils.logger import obter_logger
 from utils.visualizacao import plotar_curva_treino
 from modelos.treinador import HistoricoTreino
@@ -33,21 +35,17 @@ def treinar_two_stage(
     dispositivo: torch.device,
     dir_pesos: Path,
     dir_docs: Path,
+    usar_amp: bool = False,
+    params: Optional[dict[str, Any]] = None,
     logger: Optional[logging.Logger] = None,
 ) -> HistoricoTreino:
     """Two-stage fine-tuning: primeiro treina só a cabeça, depois descongela tudo.
 
     Stage 1 (épocas 1..epocas_congelado): backbone congelado, só cabeça.
     Stage 2 (épocas seguintes): backbone descongelado com LR menor.
-
-    Args:
-        rede: Modelo com backbone + cabeça. Assume que rede.backbone (ou rede diretamente)
-              e rede.head são acessíveis para congelar/descongelar.
-              Usa heurística: congela todos params exceto os da última camada linear.
     """
     log = logger or obter_logger(__name__)
     criterio = nn.CrossEntropyLoss()
-    usar_amp = dispositivo.type == "cuda"
     scaler = torch.cuda.amp.GradScaler() if usar_amp else None
 
     historico = HistoricoTreino()
@@ -99,7 +97,7 @@ def treinar_two_stage(
             historico.melhor_val_acc = acc_v
             sem_melhora = 0
             if salvar_checkpoints:
-                torch.save(rede.state_dict(), caminho_pesos)
+                salvar_checkpoint(rede, caminho_pesos, params=params, historico=historico)
                 log.info("  ✓ Melhor modelo salvo (val_acc=%.4f)", acc_v)
         else:
             sem_melhora += 1
@@ -116,6 +114,10 @@ def treinar_two_stage(
         historico.accs_treino, historico.accs_val,
         caminho_saida=dir_modelo / "curva_treino.png",
     )
+
+    # Registra run no historico
+    registrar_run(dir_pesos, nome_modelo, nome_experimento, params or {}, historico)
+
     log.info("Treino concluído. %s", historico.resumo())
     return historico
 
