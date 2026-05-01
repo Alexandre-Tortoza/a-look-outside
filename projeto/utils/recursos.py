@@ -101,7 +101,7 @@ def info_recursos() -> dict[str, Any]:
         info["gpus"] = []
         for i in range(n_gpus):
             props = torch.cuda.get_device_properties(i)
-            total_gb = round(props.total_mem / (1024 ** 3), 1)
+            total_gb = round(props.total_memory / (1024 ** 3), 1)
             livre_gb = round(torch.cuda.mem_get_info(i)[0] / (1024 ** 3), 1)
             info["gpus"].append({
                 "indice": i,

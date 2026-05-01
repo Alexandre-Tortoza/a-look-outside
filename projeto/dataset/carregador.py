@@ -13,8 +13,8 @@ _log = logging.getLogger(__name__)
 
 # Mapeamento de nomes lógicos para subpastas dentro de dataset/raw/
 _NOMES_RAW = {
-    "sdss": "./raw/raw-sdss.h5",
-    # "decals": "raw/decals/galaxy10_decals.h5",
+    "sdss": "./raw/sdss.h5",
+    "decals": "./raw/decals.h5",
 }
 
 
