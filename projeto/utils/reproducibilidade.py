@@ -26,11 +26,7 @@ def fixar_semente(semente: int = SEMENTE_GLOBAL, determinista: bool = True) -> N
     if determinista:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
-        try:
-            torch.use_deterministic_algorithms(True)
-        except RuntimeError:
-            # Algumas operações CUDA não suportam determinismo; aceita silenciosamente.
-            torch.use_deterministic_algorithms(False)
+        torch.use_deterministic_algorithms(True, warn_only=True)
     else:
         torch.backends.cudnn.deterministic = False
         torch.backends.cudnn.benchmark = True

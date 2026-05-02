@@ -1,0 +1,156 @@
+2026-05-01 13:34:05 | INFO     | modelos.cnn.treino | Iniciando treino CNN | params: {'seed': 42, 'epocas': 50, 'batch_size': 32, 'tamanho_imagem': 224, 'paciencia_early_stop': 10, 'scheduler_ativo': True, 'peso_decay': 0.0001, 'salvar_pesos': True, 'habilitar_xai': False, 'lr': 0.001, 'nome_modelo': 'cnn', 'dataset': 'sdss', 'versao_dataset': 'raw', 'nome_experimento': 'cnn_sdss_raw_ep50_20260501_133405'}
+2026-05-01 13:34:08 | INFO     | modelos.cnn.treino | Divisão: DivisaoDados(treino=15249, val=3267, teste=3269)
+2026-05-01 13:34:08 | INFO     | modelos.cnn.treino | Modelo: RedeCNNBaseline | parâmetros: 5230154
+2026-05-01 13:34:08 | INFO     | modelos.cnn.treino | Dispositivo: cuda | AMP: True
+2026-05-01 13:35:37 | INFO     | modelos.cnn.treino | Época   1/50 | loss 1.4787 | acc 0.4014 | val_loss 1.6046 | val_acc 0.3226
+2026-05-01 13:35:37 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.3226)
+2026-05-01 13:36:59 | INFO     | modelos.cnn.treino | Época   2/50 | loss 1.3661 | acc 0.4397 | val_loss 1.2525 | val_acc 0.4781
+2026-05-01 13:36:59 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.4781)
+2026-05-01 13:38:21 | INFO     | modelos.cnn.treino | Época   3/50 | loss 1.2493 | acc 0.4905 | val_loss 1.2877 | val_acc 0.4787
+2026-05-01 13:38:22 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.4787)
+2026-05-01 13:39:44 | INFO     | modelos.cnn.treino | Época   4/50 | loss 1.1352 | acc 0.5477 | val_loss 1.2107 | val_acc 0.5078
+2026-05-01 13:39:45 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.5078)
+2026-05-01 13:41:07 | INFO     | modelos.cnn.treino | Época   5/50 | loss 1.0454 | acc 0.5932 | val_loss 0.9899 | val_acc 0.6235
+2026-05-01 13:41:07 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.6235)
+2026-05-01 13:42:29 | INFO     | modelos.cnn.treino | Época   6/50 | loss 0.9686 | acc 0.6329 | val_loss 0.8653 | val_acc 0.6826
+2026-05-01 13:42:29 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.6826)
+2026-05-01 13:43:50 | INFO     | modelos.cnn.treino | Época   7/50 | loss 0.8849 | acc 0.6694 | val_loss 1.0437 | val_acc 0.6535
+2026-05-01 13:45:11 | INFO     | modelos.cnn.treino | Época   8/50 | loss 0.8219 | acc 0.6916 | val_loss 0.9092 | val_acc 0.7009
+2026-05-01 13:45:11 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7009)
+2026-05-01 13:46:31 | INFO     | modelos.cnn.treino | Época   9/50 | loss 0.7788 | acc 0.7150 | val_loss 0.6789 | val_acc 0.7622
+2026-05-01 13:46:31 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7622)
+2026-05-01 13:47:52 | INFO     | modelos.cnn.treino | Época  10/50 | loss 0.7446 | acc 0.7272 | val_loss 0.6459 | val_acc 0.7643
+2026-05-01 13:47:52 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7643)
+2026-05-01 13:49:13 | INFO     | modelos.cnn.treino | Época  11/50 | loss 0.7139 | acc 0.7403 | val_loss 0.6854 | val_acc 0.7570
+2026-05-01 13:50:34 | INFO     | modelos.cnn.treino | Época  12/50 | loss 0.6865 | acc 0.7484 | val_loss 0.7705 | val_acc 0.7386
+2026-05-01 13:51:56 | INFO     | modelos.cnn.treino | Época  13/50 | loss 0.6642 | acc 0.7583 | val_loss 0.6057 | val_acc 0.7906
+2026-05-01 13:51:56 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7906)
+2026-05-01 13:53:18 | INFO     | modelos.cnn.treino | Época  14/50 | loss 0.6418 | acc 0.7662 | val_loss 0.5592 | val_acc 0.8096
+2026-05-01 13:53:18 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8096)
+2026-05-01 13:54:38 | INFO     | modelos.cnn.treino | Época  15/50 | loss 0.6285 | acc 0.7709 | val_loss 0.5815 | val_acc 0.7980
+2026-05-01 13:55:59 | INFO     | modelos.cnn.treino | Época  16/50 | loss 0.6153 | acc 0.7741 | val_loss 0.5677 | val_acc 0.7989
+2026-05-01 13:57:22 | INFO     | modelos.cnn.treino | Época  17/50 | loss 0.5968 | acc 0.7858 | val_loss 0.5561 | val_acc 0.8075
+2026-05-01 13:58:47 | INFO     | modelos.cnn.treino | Época  18/50 | loss 0.5900 | acc 0.7843 | val_loss 0.5562 | val_acc 0.8111
+2026-05-01 13:58:47 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8111)
+2026-05-01 14:00:10 | INFO     | modelos.cnn.treino | Época  19/50 | loss 0.5715 | acc 0.7916 | val_loss 0.5233 | val_acc 0.8249
+2026-05-01 14:00:10 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8249)
+2026-05-01 14:01:30 | INFO     | modelos.cnn.treino | Época  20/50 | loss 0.5653 | acc 0.7948 | val_loss 0.5198 | val_acc 0.8212
+2026-05-01 14:02:50 | INFO     | modelos.cnn.treino | Época  21/50 | loss 0.5588 | acc 0.7962 | val_loss 0.5621 | val_acc 0.8066
+2026-05-01 14:04:10 | INFO     | modelos.cnn.treino | Época  22/50 | loss 0.5396 | acc 0.8063 | val_loss 0.4752 | val_acc 0.8365
+2026-05-01 14:04:10 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8365)
+2026-05-01 14:05:31 | INFO     | modelos.cnn.treino | Época  23/50 | loss 0.5366 | acc 0.8052 | val_loss 0.4988 | val_acc 0.8304
+2026-05-01 14:06:55 | INFO     | modelos.cnn.treino | Época  24/50 | loss 0.5236 | acc 0.8103 | val_loss 0.4820 | val_acc 0.8356
+2026-05-01 14:08:18 | INFO     | modelos.cnn.treino | Época  25/50 | loss 0.5157 | acc 0.8135 | val_loss 0.4566 | val_acc 0.8463
+2026-05-01 14:08:18 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8463)
+2026-05-01 14:09:40 | INFO     | modelos.cnn.treino | Época  26/50 | loss 0.5084 | acc 0.8178 | val_loss 0.4675 | val_acc 0.8384
+2026-05-01 14:11:02 | INFO     | modelos.cnn.treino | Época  27/50 | loss 0.5023 | acc 0.8165 | val_loss 0.4693 | val_acc 0.8384
+2026-05-01 14:12:23 | INFO     | modelos.cnn.treino | Época  28/50 | loss 0.4890 | acc 0.8225 | val_loss 0.4757 | val_acc 0.8347
+2026-05-01 14:13:46 | INFO     | modelos.cnn.treino | Época  29/50 | loss 0.4891 | acc 0.8226 | val_loss 0.4592 | val_acc 0.8436
+2026-05-01 14:15:09 | INFO     | modelos.cnn.treino | Época  30/50 | loss 0.4798 | acc 0.8282 | val_loss 0.4374 | val_acc 0.8500
+2026-05-01 14:15:09 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8500)
+2026-05-01 14:16:33 | INFO     | modelos.cnn.treino | Época  31/50 | loss 0.4716 | acc 0.8307 | val_loss 0.4357 | val_acc 0.8537
+2026-05-01 14:16:33 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8537)
+2026-05-01 14:17:56 | INFO     | modelos.cnn.treino | Época  32/50 | loss 0.4654 | acc 0.8324 | val_loss 0.4379 | val_acc 0.8500
+2026-05-01 14:19:18 | INFO     | modelos.cnn.treino | Época  33/50 | loss 0.4599 | acc 0.8357 | val_loss 0.4282 | val_acc 0.8500
+2026-05-01 14:20:40 | INFO     | modelos.cnn.treino | Época  34/50 | loss 0.4557 | acc 0.8334 | val_loss 0.4281 | val_acc 0.8540
+2026-05-01 14:20:40 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8540)
+2026-05-01 14:22:00 | INFO     | modelos.cnn.treino | Época  35/50 | loss 0.4471 | acc 0.8371 | val_loss 0.4153 | val_acc 0.8561
+2026-05-01 14:22:00 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8561)
+2026-05-01 14:23:21 | INFO     | modelos.cnn.treino | Época  36/50 | loss 0.4458 | acc 0.8397 | val_loss 0.4493 | val_acc 0.8408
+2026-05-01 14:24:41 | INFO     | modelos.cnn.treino | Época  37/50 | loss 0.4396 | acc 0.8416 | val_loss 0.4150 | val_acc 0.8564
+2026-05-01 14:24:41 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8564)
+2026-05-01 14:26:04 | INFO     | modelos.cnn.treino | Época  38/50 | loss 0.4389 | acc 0.8420 | val_loss 0.4128 | val_acc 0.8564
+2026-05-01 14:27:24 | INFO     | modelos.cnn.treino | Época  39/50 | loss 0.4316 | acc 0.8427 | val_loss 0.4032 | val_acc 0.8623
+2026-05-01 14:27:24 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8623)
+2026-05-01 14:28:44 | INFO     | modelos.cnn.treino | Época  40/50 | loss 0.4224 | acc 0.8451 | val_loss 0.4078 | val_acc 0.8567
+2026-05-01 14:30:04 | INFO     | modelos.cnn.treino | Época  41/50 | loss 0.4240 | acc 0.8462 | val_loss 0.4058 | val_acc 0.8638
+2026-05-01 14:30:05 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8638)
+2026-05-01 14:31:25 | INFO     | modelos.cnn.treino | Época  42/50 | loss 0.4139 | acc 0.8503 | val_loss 0.4030 | val_acc 0.8623
+2026-05-01 14:32:45 | INFO     | modelos.cnn.treino | Época  43/50 | loss 0.4136 | acc 0.8472 | val_loss 0.3991 | val_acc 0.8659
+2026-05-01 14:32:45 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8659)
+2026-05-01 14:34:05 | INFO     | modelos.cnn.treino | Época  44/50 | loss 0.4125 | acc 0.8504 | val_loss 0.3980 | val_acc 0.8610
+2026-05-01 14:35:25 | INFO     | modelos.cnn.treino | Época  45/50 | loss 0.4106 | acc 0.8512 | val_loss 0.3932 | val_acc 0.8635
+2026-05-01 14:36:46 | INFO     | modelos.cnn.treino | Época  46/50 | loss 0.4087 | acc 0.8539 | val_loss 0.3940 | val_acc 0.8626
+2026-05-01 14:38:06 | INFO     | modelos.cnn.treino | Época  47/50 | loss 0.4041 | acc 0.8533 | val_loss 0.3942 | val_acc 0.8641
+2026-05-01 14:39:26 | INFO     | modelos.cnn.treino | Época  48/50 | loss 0.4001 | acc 0.8554 | val_loss 0.3946 | val_acc 0.8635
+2026-05-01 14:40:46 | INFO     | modelos.cnn.treino | Época  49/50 | loss 0.4076 | acc 0.8501 | val_loss 0.3925 | val_acc 0.8641
+2026-05-01 14:42:06 | INFO     | modelos.cnn.treino | Época  50/50 | loss 0.4018 | acc 0.8558 | val_loss 0.3914 | val_acc 0.8623
+2026-05-01 14:42:07 | INFO     | modelos.cnn.treino | Treino concluído. Épocas: 50 | Melhor val_acc: 0.8659 | Early stop: False
+2026-05-01 15:37:18 | INFO     | modelos.cnn.treino | Iniciando treino CNN | params: {'seed': 42, 'epocas': 50, 'batch_size': 32, 'tamanho_imagem': 224, 'paciencia_early_stop': 10, 'scheduler_ativo': True, 'peso_decay': 0.0001, 'salvar_pesos': True, 'habilitar_xai': False, 'lr': 0.001, 'nome_modelo': 'cnn', 'dataset': 'sdss', 'versao_dataset': 'raw', 'nome_experimento': 'cnn_sdss_raw_ep50_20260501_153718'}
+2026-05-01 15:37:20 | INFO     | modelos.cnn.treino | Divisão: DivisaoDados(treino=15249, val=3267, teste=3269)
+2026-05-01 15:37:20 | INFO     | modelos.cnn.treino | Modelo: RedeCNNBaseline | parâmetros: 5230154
+2026-05-01 15:37:20 | INFO     | modelos.cnn.treino | Dispositivo: cuda | AMP: True
+2026-05-01 15:38:47 | INFO     | modelos.cnn.treino | Época   1/50 | loss 1.4787 | acc 0.4014 | val_loss 1.6046 | val_acc 0.3226
+2026-05-01 15:38:47 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.3226)
+2026-05-01 15:40:07 | INFO     | modelos.cnn.treino | Época   2/50 | loss 1.3661 | acc 0.4397 | val_loss 1.2525 | val_acc 0.4781
+2026-05-01 15:40:07 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.4781)
+2026-05-01 15:41:27 | INFO     | modelos.cnn.treino | Época   3/50 | loss 1.2493 | acc 0.4905 | val_loss 1.2877 | val_acc 0.4787
+2026-05-01 15:41:27 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.4787)
+2026-05-01 15:42:47 | INFO     | modelos.cnn.treino | Época   4/50 | loss 1.1352 | acc 0.5477 | val_loss 1.2107 | val_acc 0.5078
+2026-05-01 15:42:47 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.5078)
+2026-05-01 15:44:07 | INFO     | modelos.cnn.treino | Época   5/50 | loss 1.0454 | acc 0.5932 | val_loss 0.9899 | val_acc 0.6235
+2026-05-01 15:44:07 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.6235)
+2026-05-01 15:45:27 | INFO     | modelos.cnn.treino | Época   6/50 | loss 0.9686 | acc 0.6329 | val_loss 0.8653 | val_acc 0.6826
+2026-05-01 15:45:27 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.6826)
+2026-05-01 15:46:47 | INFO     | modelos.cnn.treino | Época   7/50 | loss 0.8849 | acc 0.6694 | val_loss 1.0437 | val_acc 0.6535
+2026-05-01 15:48:07 | INFO     | modelos.cnn.treino | Época   8/50 | loss 0.8219 | acc 0.6916 | val_loss 0.9092 | val_acc 0.7009
+2026-05-01 15:48:07 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7009)
+2026-05-01 15:49:27 | INFO     | modelos.cnn.treino | Época   9/50 | loss 0.7788 | acc 0.7150 | val_loss 0.6789 | val_acc 0.7622
+2026-05-01 15:49:27 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7622)
+2026-05-01 15:50:47 | INFO     | modelos.cnn.treino | Época  10/50 | loss 0.7446 | acc 0.7272 | val_loss 0.6459 | val_acc 0.7643
+2026-05-01 15:50:47 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7643)
+2026-05-01 15:52:07 | INFO     | modelos.cnn.treino | Época  11/50 | loss 0.7139 | acc 0.7403 | val_loss 0.6854 | val_acc 0.7570
+2026-05-01 15:53:27 | INFO     | modelos.cnn.treino | Época  12/50 | loss 0.6865 | acc 0.7484 | val_loss 0.7705 | val_acc 0.7386
+2026-05-01 15:54:47 | INFO     | modelos.cnn.treino | Época  13/50 | loss 0.6642 | acc 0.7583 | val_loss 0.6057 | val_acc 0.7906
+2026-05-01 15:54:47 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.7906)
+2026-05-01 15:56:08 | INFO     | modelos.cnn.treino | Época  14/50 | loss 0.6418 | acc 0.7662 | val_loss 0.5592 | val_acc 0.8096
+2026-05-01 15:56:08 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8096)
+2026-05-01 15:57:28 | INFO     | modelos.cnn.treino | Época  15/50 | loss 0.6285 | acc 0.7709 | val_loss 0.5815 | val_acc 0.7980
+2026-05-01 15:58:48 | INFO     | modelos.cnn.treino | Época  16/50 | loss 0.6153 | acc 0.7741 | val_loss 0.5677 | val_acc 0.7989
+2026-05-01 16:00:08 | INFO     | modelos.cnn.treino | Época  17/50 | loss 0.5968 | acc 0.7858 | val_loss 0.5561 | val_acc 0.8075
+2026-05-01 16:01:28 | INFO     | modelos.cnn.treino | Época  18/50 | loss 0.5900 | acc 0.7843 | val_loss 0.5562 | val_acc 0.8111
+2026-05-01 16:01:29 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8111)
+2026-05-01 16:02:49 | INFO     | modelos.cnn.treino | Época  19/50 | loss 0.5715 | acc 0.7916 | val_loss 0.5233 | val_acc 0.8249
+2026-05-01 16:02:49 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8249)
+2026-05-01 16:04:09 | INFO     | modelos.cnn.treino | Época  20/50 | loss 0.5653 | acc 0.7948 | val_loss 0.5198 | val_acc 0.8212
+2026-05-01 16:05:29 | INFO     | modelos.cnn.treino | Época  21/50 | loss 0.5588 | acc 0.7962 | val_loss 0.5621 | val_acc 0.8066
+2026-05-01 16:06:49 | INFO     | modelos.cnn.treino | Época  22/50 | loss 0.5396 | acc 0.8063 | val_loss 0.4752 | val_acc 0.8365
+2026-05-01 16:06:49 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8365)
+2026-05-01 16:08:10 | INFO     | modelos.cnn.treino | Época  23/50 | loss 0.5366 | acc 0.8052 | val_loss 0.4988 | val_acc 0.8304
+2026-05-01 16:09:30 | INFO     | modelos.cnn.treino | Época  24/50 | loss 0.5236 | acc 0.8103 | val_loss 0.4820 | val_acc 0.8356
+2026-05-01 16:10:50 | INFO     | modelos.cnn.treino | Época  25/50 | loss 0.5157 | acc 0.8135 | val_loss 0.4566 | val_acc 0.8463
+2026-05-01 16:10:50 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8463)
+2026-05-01 16:12:10 | INFO     | modelos.cnn.treino | Época  26/50 | loss 0.5084 | acc 0.8178 | val_loss 0.4675 | val_acc 0.8384
+2026-05-01 16:13:31 | INFO     | modelos.cnn.treino | Época  27/50 | loss 0.5023 | acc 0.8165 | val_loss 0.4693 | val_acc 0.8384
+2026-05-01 16:14:51 | INFO     | modelos.cnn.treino | Época  28/50 | loss 0.4890 | acc 0.8225 | val_loss 0.4757 | val_acc 0.8347
+2026-05-01 16:16:11 | INFO     | modelos.cnn.treino | Época  29/50 | loss 0.4891 | acc 0.8226 | val_loss 0.4592 | val_acc 0.8436
+2026-05-01 16:17:31 | INFO     | modelos.cnn.treino | Época  30/50 | loss 0.4798 | acc 0.8282 | val_loss 0.4374 | val_acc 0.8500
+2026-05-01 16:17:31 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8500)
+2026-05-01 16:18:51 | INFO     | modelos.cnn.treino | Época  31/50 | loss 0.4716 | acc 0.8307 | val_loss 0.4357 | val_acc 0.8537
+2026-05-01 16:18:51 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8537)
+2026-05-01 16:20:11 | INFO     | modelos.cnn.treino | Época  32/50 | loss 0.4654 | acc 0.8324 | val_loss 0.4379 | val_acc 0.8500
+2026-05-01 16:21:32 | INFO     | modelos.cnn.treino | Época  33/50 | loss 0.4599 | acc 0.8357 | val_loss 0.4282 | val_acc 0.8500
+2026-05-01 16:22:52 | INFO     | modelos.cnn.treino | Época  34/50 | loss 0.4557 | acc 0.8334 | val_loss 0.4281 | val_acc 0.8540
+2026-05-01 16:22:52 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8540)
+2026-05-01 16:24:12 | INFO     | modelos.cnn.treino | Época  35/50 | loss 0.4471 | acc 0.8371 | val_loss 0.4153 | val_acc 0.8561
+2026-05-01 16:24:12 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8561)
+2026-05-01 16:25:32 | INFO     | modelos.cnn.treino | Época  36/50 | loss 0.4458 | acc 0.8397 | val_loss 0.4493 | val_acc 0.8408
+2026-05-01 16:26:53 | INFO     | modelos.cnn.treino | Época  37/50 | loss 0.4396 | acc 0.8416 | val_loss 0.4150 | val_acc 0.8564
+2026-05-01 16:26:53 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8564)
+2026-05-01 16:28:13 | INFO     | modelos.cnn.treino | Época  38/50 | loss 0.4389 | acc 0.8420 | val_loss 0.4128 | val_acc 0.8564
+2026-05-01 16:29:33 | INFO     | modelos.cnn.treino | Época  39/50 | loss 0.4316 | acc 0.8427 | val_loss 0.4032 | val_acc 0.8623
+2026-05-01 16:29:33 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8623)
+2026-05-01 16:30:53 | INFO     | modelos.cnn.treino | Época  40/50 | loss 0.4224 | acc 0.8451 | val_loss 0.4078 | val_acc 0.8567
+2026-05-01 16:32:13 | INFO     | modelos.cnn.treino | Época  41/50 | loss 0.4240 | acc 0.8462 | val_loss 0.4058 | val_acc 0.8638
+2026-05-01 16:32:13 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8638)
+2026-05-01 16:33:34 | INFO     | modelos.cnn.treino | Época  42/50 | loss 0.4139 | acc 0.8503 | val_loss 0.4030 | val_acc 0.8623
+2026-05-01 16:34:54 | INFO     | modelos.cnn.treino | Época  43/50 | loss 0.4136 | acc 0.8472 | val_loss 0.3991 | val_acc 0.8659
+2026-05-01 16:34:54 | INFO     | modelos.cnn.treino |   ✓ Melhor modelo salvo (val_acc=0.8659)
+2026-05-01 16:36:14 | INFO     | modelos.cnn.treino | Época  44/50 | loss 0.4125 | acc 0.8504 | val_loss 0.3980 | val_acc 0.8610
+2026-05-01 16:37:34 | INFO     | modelos.cnn.treino | Época  45/50 | loss 0.4106 | acc 0.8512 | val_loss 0.3932 | val_acc 0.8635
+2026-05-01 16:38:54 | INFO     | modelos.cnn.treino | Época  46/50 | loss 0.4087 | acc 0.8539 | val_loss 0.3940 | val_acc 0.8626
+2026-05-01 16:40:14 | INFO     | modelos.cnn.treino | Época  47/50 | loss 0.4041 | acc 0.8533 | val_loss 0.3942 | val_acc 0.8641
+2026-05-01 16:41:35 | INFO     | modelos.cnn.treino | Época  48/50 | loss 0.4001 | acc 0.8554 | val_loss 0.3946 | val_acc 0.8635
+2026-05-01 16:42:55 | INFO     | modelos.cnn.treino | Época  49/50 | loss 0.4076 | acc 0.8501 | val_loss 0.3925 | val_acc 0.8641
+2026-05-01 16:44:15 | INFO     | modelos.cnn.treino | Época  50/50 | loss 0.4018 | acc 0.8558 | val_loss 0.3914 | val_acc 0.8623
+2026-05-01 16:44:15 | INFO     | modelos.cnn.treino | Treino concluído. Épocas: 50 | Melhor val_acc: 0.8659 | Early stop: False

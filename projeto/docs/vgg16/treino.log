@@ -1,0 +1,67 @@
+2026-05-01 17:40:32 | INFO     | modelos.vgg16.treino | Stage 1: backbone congelado, treinando cabeça (LR=1.0e-03)
+2026-05-01 17:42:41 | INFO     | modelos.vgg16.treino | Época   1/50 | loss 1.1706 | acc 0.5472 | val_loss 0.8954 | val_acc 0.6563
+2026-05-01 17:42:41 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.6563)
+2026-05-01 17:44:44 | INFO     | modelos.vgg16.treino | Época   2/50 | loss 0.9225 | acc 0.6475 | val_loss 0.8618 | val_acc 0.6605
+2026-05-01 17:44:45 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.6605)
+2026-05-01 17:46:48 | INFO     | modelos.vgg16.treino | Época   3/50 | loss 0.8358 | acc 0.6832 | val_loss 0.7755 | val_acc 0.6967
+2026-05-01 17:46:49 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.6967)
+2026-05-01 17:48:52 | INFO     | modelos.vgg16.treino | Época   4/50 | loss 0.7987 | acc 0.6987 | val_loss 0.7775 | val_acc 0.7184
+2026-05-01 17:48:53 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.7184)
+2026-05-01 17:50:56 | INFO     | modelos.vgg16.treino | Época   5/50 | loss 0.7429 | acc 0.7202 | val_loss 0.7403 | val_acc 0.7169
+2026-05-01 17:50:56 | INFO     | modelos.vgg16.treino | Stage 2: backbone descongelado (backbone LR=1.0e-04, cabeça LR=1.0e-03)
+2026-05-01 17:54:24 | INFO     | modelos.vgg16.treino | Época   6/50 | loss 0.8182 | acc 0.7025 | val_loss 0.5307 | val_acc 0.8246
+2026-05-01 17:54:25 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8246)
+2026-05-01 17:57:53 | INFO     | modelos.vgg16.treino | Época   7/50 | loss 0.6164 | acc 0.7812 | val_loss 0.5275 | val_acc 0.8176
+2026-05-01 18:01:21 | INFO     | modelos.vgg16.treino | Época   8/50 | loss 0.5355 | acc 0.8131 | val_loss 0.5092 | val_acc 0.8173
+2026-05-01 18:04:50 | INFO     | modelos.vgg16.treino | Época   9/50 | loss 0.4893 | acc 0.8286 | val_loss 0.4736 | val_acc 0.8411
+2026-05-01 18:04:51 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8411)
+2026-05-01 18:08:19 | INFO     | modelos.vgg16.treino | Época  10/50 | loss 0.4689 | acc 0.8333 | val_loss 0.4052 | val_acc 0.8580
+2026-05-01 18:08:19 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8580)
+2026-05-01 18:11:47 | INFO     | modelos.vgg16.treino | Época  11/50 | loss 0.4456 | acc 0.8454 | val_loss 0.4245 | val_acc 0.8574
+2026-05-01 18:15:16 | INFO     | modelos.vgg16.treino | Época  12/50 | loss 0.4210 | acc 0.8524 | val_loss 0.4305 | val_acc 0.8491
+2026-05-01 18:18:44 | INFO     | modelos.vgg16.treino | Época  13/50 | loss 0.4000 | acc 0.8587 | val_loss 0.4478 | val_acc 0.8531
+2026-05-01 18:22:13 | INFO     | modelos.vgg16.treino | Época  14/50 | loss 0.3883 | acc 0.8673 | val_loss 0.4871 | val_acc 0.8537
+2026-05-01 18:25:41 | INFO     | modelos.vgg16.treino | Época  15/50 | loss 0.3769 | acc 0.8724 | val_loss 0.4459 | val_acc 0.8463
+2026-05-01 18:29:10 | INFO     | modelos.vgg16.treino | Época  16/50 | loss 0.3610 | acc 0.8787 | val_loss 0.3975 | val_acc 0.8717
+2026-05-01 18:29:11 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8717)
+2026-05-01 18:32:39 | INFO     | modelos.vgg16.treino | Época  17/50 | loss 0.3414 | acc 0.8827 | val_loss 0.4011 | val_acc 0.8721
+2026-05-01 18:32:40 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8721)
+2026-05-01 18:36:08 | INFO     | modelos.vgg16.treino | Época  18/50 | loss 0.3323 | acc 0.8850 | val_loss 0.4536 | val_acc 0.8451
+2026-05-01 18:39:36 | INFO     | modelos.vgg16.treino | Época  19/50 | loss 0.3226 | acc 0.8903 | val_loss 0.4360 | val_acc 0.8620
+2026-05-01 18:43:05 | INFO     | modelos.vgg16.treino | Época  20/50 | loss 0.3048 | acc 0.8961 | val_loss 0.4789 | val_acc 0.8546
+2026-05-01 18:46:33 | INFO     | modelos.vgg16.treino | Época  21/50 | loss 0.2970 | acc 0.8977 | val_loss 0.3977 | val_acc 0.8717
+2026-05-01 18:50:02 | INFO     | modelos.vgg16.treino | Época  22/50 | loss 0.2873 | acc 0.9029 | val_loss 0.4084 | val_acc 0.8806
+2026-05-01 18:50:02 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8806)
+2026-05-01 18:53:30 | INFO     | modelos.vgg16.treino | Época  23/50 | loss 0.2733 | acc 0.9074 | val_loss 0.4235 | val_acc 0.8733
+2026-05-01 18:56:59 | INFO     | modelos.vgg16.treino | Época  24/50 | loss 0.2643 | acc 0.9131 | val_loss 0.4341 | val_acc 0.8782
+2026-05-01 19:00:28 | INFO     | modelos.vgg16.treino | Época  25/50 | loss 0.2473 | acc 0.9175 | val_loss 0.4417 | val_acc 0.8714
+2026-05-01 19:03:56 | INFO     | modelos.vgg16.treino | Época  26/50 | loss 0.2456 | acc 0.9215 | val_loss 0.4508 | val_acc 0.8825
+2026-05-01 19:03:57 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8825)
+2026-05-01 19:07:25 | INFO     | modelos.vgg16.treino | Época  27/50 | loss 0.2313 | acc 0.9227 | val_loss 0.4900 | val_acc 0.8699
+2026-05-01 19:10:53 | INFO     | modelos.vgg16.treino | Época  28/50 | loss 0.2253 | acc 0.9271 | val_loss 0.4698 | val_acc 0.8809
+2026-05-01 19:14:22 | INFO     | modelos.vgg16.treino | Época  29/50 | loss 0.2081 | acc 0.9334 | val_loss 0.5205 | val_acc 0.8800
+2026-05-01 19:17:51 | INFO     | modelos.vgg16.treino | Época  30/50 | loss 0.2032 | acc 0.9357 | val_loss 0.5838 | val_acc 0.8742
+2026-05-01 19:21:19 | INFO     | modelos.vgg16.treino | Época  31/50 | loss 0.1861 | acc 0.9413 | val_loss 0.5098 | val_acc 0.8797
+2026-05-01 19:24:47 | INFO     | modelos.vgg16.treino | Época  32/50 | loss 0.1763 | acc 0.9445 | val_loss 0.5245 | val_acc 0.8904
+2026-05-01 19:24:48 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8904)
+2026-05-01 19:28:16 | INFO     | modelos.vgg16.treino | Época  33/50 | loss 0.1691 | acc 0.9485 | val_loss 0.5705 | val_acc 0.8806
+2026-05-01 19:31:45 | INFO     | modelos.vgg16.treino | Época  34/50 | loss 0.1561 | acc 0.9530 | val_loss 0.5460 | val_acc 0.8867
+2026-05-01 19:35:13 | INFO     | modelos.vgg16.treino | Época  35/50 | loss 0.1446 | acc 0.9562 | val_loss 0.6743 | val_acc 0.8776
+2026-05-01 19:38:42 | INFO     | modelos.vgg16.treino | Época  36/50 | loss 0.1404 | acc 0.9584 | val_loss 0.6293 | val_acc 0.8858
+2026-05-01 19:42:10 | INFO     | modelos.vgg16.treino | Época  37/50 | loss 0.1276 | acc 0.9639 | val_loss 0.6093 | val_acc 0.8861
+2026-05-01 19:45:39 | INFO     | modelos.vgg16.treino | Época  38/50 | loss 0.1198 | acc 0.9641 | val_loss 0.6340 | val_acc 0.8919
+2026-05-01 19:45:40 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8919)
+2026-05-01 19:49:08 | INFO     | modelos.vgg16.treino | Época  39/50 | loss 0.1134 | acc 0.9693 | val_loss 0.6951 | val_acc 0.8910
+2026-05-01 19:52:36 | INFO     | modelos.vgg16.treino | Época  40/50 | loss 0.1113 | acc 0.9692 | val_loss 0.7107 | val_acc 0.8892
+2026-05-01 19:56:05 | INFO     | modelos.vgg16.treino | Época  41/50 | loss 0.1072 | acc 0.9694 | val_loss 0.6963 | val_acc 0.8938
+2026-05-01 19:56:05 | INFO     | modelos.vgg16.treino |   ✓ Melhor modelo salvo (val_acc=0.8938)
+2026-05-01 19:59:33 | INFO     | modelos.vgg16.treino | Época  42/50 | loss 0.0918 | acc 0.9737 | val_loss 0.6768 | val_acc 0.8923
+2026-05-01 20:03:02 | INFO     | modelos.vgg16.treino | Época  43/50 | loss 0.0935 | acc 0.9762 | val_loss 0.6928 | val_acc 0.8938
+2026-05-01 20:06:30 | INFO     | modelos.vgg16.treino | Época  44/50 | loss 0.0811 | acc 0.9766 | val_loss 0.7330 | val_acc 0.8926
+2026-05-01 20:09:59 | INFO     | modelos.vgg16.treino | Época  45/50 | loss 0.0885 | acc 0.9767 | val_loss 0.7643 | val_acc 0.8935
+2026-05-01 20:13:27 | INFO     | modelos.vgg16.treino | Época  46/50 | loss 0.0778 | acc 0.9776 | val_loss 0.7690 | val_acc 0.8901
+2026-05-01 20:16:56 | INFO     | modelos.vgg16.treino | Época  47/50 | loss 0.0749 | acc 0.9799 | val_loss 0.7874 | val_acc 0.8910
+2026-05-01 20:20:24 | INFO     | modelos.vgg16.treino | Época  48/50 | loss 0.0694 | acc 0.9805 | val_loss 0.7980 | val_acc 0.8910
+2026-05-01 20:23:53 | INFO     | modelos.vgg16.treino | Época  49/50 | loss 0.0712 | acc 0.9803 | val_loss 0.8036 | val_acc 0.8938
+2026-05-01 20:27:21 | INFO     | modelos.vgg16.treino | Época  50/50 | loss 0.0706 | acc 0.9803 | val_loss 0.8128 | val_acc 0.8929
+2026-05-01 20:27:22 | INFO     | modelos.vgg16.treino | Treino concluído. Épocas: 50 | Melhor val_acc: 0.8938 | Early stop: False
