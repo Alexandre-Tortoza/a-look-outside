@@ -74,10 +74,12 @@ class TreinadorModelo:
         salvar_checkpoints: bool = True,
         scheduler_ativo: bool = True,
         peso_decay: float = 1e-4,
+        label_smoothing: float = 0.0,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         self.epocas = epocas
         self.lr = lr
+        self.label_smoothing = label_smoothing
         self.dir_pesos = Path(dir_pesos)
         self.dir_docs = Path(dir_docs)
         self.paciencia = paciencia_early_stop
@@ -116,7 +118,7 @@ class TreinadorModelo:
             HistoricoTreino com todas as métricas por época.
         """
         rede = rede.to(self.dispositivo)
-        criterio = nn.CrossEntropyLoss()
+        criterio = nn.CrossEntropyLoss(label_smoothing=self.label_smoothing)
         otimizador = AdamW(rede.parameters(), lr=self.lr, weight_decay=self.peso_decay)
         scheduler = (
             CosineAnnealingLR(otimizador, T_max=self.epocas, eta_min=1e-6)

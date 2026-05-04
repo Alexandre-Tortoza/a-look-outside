@@ -24,6 +24,14 @@ global:
   habilitar_xai: false
 
 # ============================================================
+# XAI — configuracoes de explicabilidade
+# ============================================================
+xai:
+  amostras_por_classe: 50      # maximo de imagens por classe para grade
+  imagens_por_linha: 10        # colunas na grade visual
+  diretorio_saida: "docs/xai"  # raiz de saida (subpasta = nome do modelo)
+
+# ============================================================
 # MODELOS — herda do global, sobrescreve o que precisar
 # ============================================================
 modelos:
@@ -32,9 +40,10 @@ modelos:
 
   resnet50:
     lr_cabeca: 1.0e-3
-    lr_backbone: 1.0e-4
+    lr_backbone: 5.0e-5          # reduzido de 1e-4 para ganho fino
     epocas_congelado: 5
     pretrained: true
+    label_smoothing: 0.1
 
   efficientnet:
     lr_cabeca: 1.0e-3
@@ -49,6 +58,10 @@ modelos:
     epocas_congelado: 5
     batch_size: 16                # VGG16 pesado, batch menor
     pretrained: true
+    paciencia_early_stop: 5       # early stop agressivo (custo alto)
+    label_smoothing: 0.05
+    distilacao_temperatura: 4.0   # temperatura para knowledge distillation
+    distilacao_alpha: 0.7         # peso da soft loss (0=só hard, 1=só soft)
 
   vit:
     lr_cabeca: 1.0e-3
@@ -56,13 +69,20 @@ modelos:
     epocas_congelado: 10
     backbone: "vit_base_patch16_224"
     pretrained: true
+    drop_path_rate: 0.1           # stochastic depth
+    rand_augment: true            # RandAugment no treino
+    mixup_alpha: 0.8              # MixUp por batch
+    cutmix_alpha: 1.0             # CutMix por batch (alternado com MixUp)
+    label_smoothing: 0.1
 
   dino:
     modo: "hub"                   # "hub" | "pre_treino"
     backbone: "dinov2_vitb14"
     lr_cabeca: 1.0e-3
-    lr_backbone: 1.0e-5
+    lr_backbone: 5.0e-6           # reduzido de 1e-5 para evitar degradação
     epocas_congelado: 5
+    label_smoothing: 0.1
+    cabeca_mlp: true              # MLP head (Linear→GELU→Dropout→Linear)
     # pre-treino (so usado se modo == "pre_treino")
     epocas_pre_treino: 100
     epocas_ajuste_fino: 30
@@ -121,4 +141,49 @@ experimentos:
     modelos: [resnet50, vit]
     treinar_em: decals
     avaliar_em: sdss
+    versao_dataset: raw
+
+  # ── Top-3 otimizado ─────────────────────────────────────────────────
+  top3_otimizado:
+    modelos: [resnet50, vit, dino]
+    datasets: [decals]
+    versao_dataset: raw
+
+  # ── Busca de epocas_congelado para ResNet50 (ec=5 já é o default) ──
+  resnet50_busca_ec3:
+    modelos: [resnet50]
+    datasets: [decals]
+    versao_dataset: raw
+    epocas_congelado: 3
+
+  resnet50_busca_ec8:
+    modelos: [resnet50]
+    datasets: [decals]
+    versao_dataset: raw
+    epocas_congelado: 8
+
+  # ── VGG16 com knowledge distillation (professor = ResNet50) ─────────
+  vgg16_distilacao:
+    modelos: [vgg16]
+    datasets: [decals]
+    versao_dataset: raw
+    modo_treino: distilacao
+
+  # ── Pipeline estado da arte — cross-dataset ──────────────────────────
+  cross_sdss_para_decals:
+    modelos: [vgg16]
+    treinar_em: sdss
+    versao_dataset: hibrido
+    avaliar_em: decals
+
+  cross_decals_para_sdss:
+    modelos: [vgg16]
+    treinar_em: decals
+    versao_dataset: raw
+    avaliar_em: sdss
+
+  # ── Dataset fusao (SDSS + DECaLS, somente imagens) ───────────────────
+  vgg16_fusao:
+    modelos: [vgg16]
+    datasets: [fusao]
     versao_dataset: raw

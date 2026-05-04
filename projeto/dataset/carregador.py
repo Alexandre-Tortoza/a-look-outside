@@ -15,6 +15,7 @@ _log = logging.getLogger(__name__)
 _NOMES_RAW = {
     "sdss": "./raw/sdss.h5",
     "decals": "./raw/decals.h5",
+    "fusao": "./processados/fusao.h5",   # SDSS + DECaLS combinados (224x224, somente imagens)
 }
 
 

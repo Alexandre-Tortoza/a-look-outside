@@ -1,0 +1,127 @@
+2026-05-03 23:58:48 | INFO     | vgg_datasets | Pipeline VGG16 × Datasets | fases=[0, 1, 2, 3] | ids=todas
+2026-05-03 23:58:48 | DEBUG    | vgg_datasets | Pre-popular: t1 → vgg16_sdss_raw_ep50_20260501_173036.pth
+2026-05-03 23:58:48 | DEBUG    | vgg_datasets | Pre-popular: t2 → vgg16_sdss_hibrido_ep50_20260502_221730.pth
+2026-05-03 23:58:48 | INFO     | vgg_datasets | Dataset fusao nao existe — criando (pode demorar alguns minutos)...
+2026-05-04 00:02:07 | INFO     | vgg_datasets | Fusao criada: dataset/processados/fusao.h5
+2026-05-04 00:02:07 | INFO     | vgg_datasets | 
+2026-05-04 00:02:07 | INFO     | vgg_datasets | ┌─ TREINO T1: VGG16 treina SDSS/raw
+2026-05-04 00:02:07 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_sdss_raw_ep50_20260501_173036.pth
+2026-05-04 00:02:07 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 00:02:07 | INFO     | vgg_datasets | └─ OK
+2026-05-04 00:02:07 | INFO     | vgg_datasets | 
+2026-05-04 00:02:07 | INFO     | vgg_datasets | ┌─ TREINO T2: VGG16 treina SDSS/hibrido
+2026-05-04 00:02:07 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_sdss_hibrido_ep50_20260502_221730.pth
+2026-05-04 00:02:07 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 00:02:07 | INFO     | vgg_datasets | └─ OK
+2026-05-04 00:02:07 | INFO     | vgg_datasets | 
+2026-05-04 00:02:07 | INFO     | vgg_datasets | ┌─ TREINO T3: VGG16 treina DECaLS/raw
+2026-05-04 00:02:07 | INFO     | vgg_datasets | │  Treinando VGG16 em decals/raw...
+2026-05-04 01:37:32 | INFO     | vgg_datasets | │  Épocas: 36 | Melhor val_acc: 0.8707 | Early stop: True
+2026-05-04 01:37:32 | INFO     | vgg_datasets | └─ Checkpoint: vgg16_decals_raw_ep50_20260504_000207.pth
+2026-05-04 01:37:32 | INFO     | vgg_datasets | 
+2026-05-04 01:37:32 | INFO     | vgg_datasets | ┌─ TREINO T4: VGG16 treina fusao
+2026-05-04 01:37:32 | INFO     | vgg_datasets | │  Treinando VGG16 em fusao/raw...
+2026-05-04 04:38:45 | INFO     | vgg_datasets | │  Épocas: 31 | Melhor val_acc: 0.8701 | Early stop: True
+2026-05-04 04:38:45 | INFO     | vgg_datasets | └─ Checkpoint: vgg16_fusao_raw_ep50_20260504_013732.pth
+2026-05-04 04:38:45 | INFO     | vgg_datasets | 
+2026-05-04 04:38:45 | INFO     | vgg_datasets | ┌─ TREINO T5: Fine-tune T2 → fusao (estado da arte)
+2026-05-04 04:38:45 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_fusao_raw_ep50_20260504_013732.pth
+2026-05-04 04:38:45 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 04:38:45 | INFO     | vgg_datasets | └─ OK
+2026-05-04 04:38:45 | INFO     | vgg_datasets | Avaliando t1_t1  | T1 val SDSS/raw                     | modo=split | eval=sdss
+2026-05-04 04:39:13 | INFO     | vgg_datasets |   → acc=0.8838  f1=0.7600  [t1_t1.md]
+2026-05-04 04:39:13 | INFO     | vgg_datasets | Avaliando t2_t2  | T2 val SDSS/hibrido                 | modo=split | eval=sdss
+2026-05-04 04:40:18 | INFO     | vgg_datasets |   → acc=0.9679  f1=0.9677  [t2_t2.md]
+2026-05-04 04:40:18 | INFO     | vgg_datasets | Avaliando t3_t3  | T3 val DECaLS/raw                   | modo=split | eval=decals
+2026-05-04 04:41:08 | INFO     | vgg_datasets |   → acc=0.8512  f1=0.8268  [t3_t3.md]
+2026-05-04 04:41:08 | INFO     | vgg_datasets | Avaliando t4_t4  | T4 val fusao                        | modo=split | eval=fusao
+2026-05-04 04:42:32 | INFO     | vgg_datasets |   → acc=0.8689  f1=0.8592  [t4_t4.md]
+2026-05-04 04:42:32 | INFO     | vgg_datasets | Avaliando t5_t5  | T5 val fusao (FT)                   | modo=split | eval=fusao
+2026-05-04 04:43:54 | INFO     | vgg_datasets |   → acc=0.8689  f1=0.8592  [t5_t5.md]
+2026-05-04 04:43:54 | INFO     | vgg_datasets | Avaliando t1_c1  | T1 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 04:45:59 | INFO     | vgg_datasets |   → acc=0.0520  f1=0.0377  [t1_c1.md]
+2026-05-04 04:45:59 | INFO     | vgg_datasets | Avaliando t1_c2  | T1 → fusao completo                 | modo=full  | eval=fusao
+2026-05-04 04:50:28 | INFO     | vgg_datasets |   → acc=0.5471  f1=0.4100  [t1_c2.md]
+2026-05-04 04:50:28 | INFO     | vgg_datasets | Avaliando t2_c3  | T2 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 04:52:35 | INFO     | vgg_datasets |   → acc=0.0843  f1=0.0583  [t2_c3.md]
+2026-05-04 04:52:35 | INFO     | vgg_datasets | Avaliando t2_c4  | T2 → fusao completo                 | modo=full  | eval=fusao
+2026-05-04 04:57:25 | INFO     | vgg_datasets |   → acc=0.5744  f1=0.4348  [t2_c4.md]
+2026-05-04 04:57:25 | INFO     | vgg_datasets | Avaliando t3_c5  | T3 → SDSS completo                  | modo=full  | eval=sdss
+2026-05-04 04:59:19 | INFO     | vgg_datasets |   → acc=0.0638  f1=0.0418  [t3_c5.md]
+2026-05-04 04:59:19 | INFO     | vgg_datasets | Avaliando t3_c6  | T3 → fusao completo                 | modo=full  | eval=fusao
+2026-05-04 05:03:44 | INFO     | vgg_datasets |   → acc=0.4459  f1=0.5036  [t3_c6.md]
+2026-05-04 05:03:44 | INFO     | vgg_datasets | Avaliando t4_c7  | T4 → SDSS completo                  | modo=full  | eval=sdss
+2026-05-04 05:05:39 | INFO     | vgg_datasets |   → acc=0.9162  f1=0.8021  [t4_c7.md]
+2026-05-04 05:05:39 | INFO     | vgg_datasets | Avaliando t4_c8  | T4 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 05:07:45 | INFO     | vgg_datasets |   → acc=0.9071  f1=0.8880  [t4_c8.md]
+2026-05-04 05:07:45 | INFO     | vgg_datasets | Avaliando t5_c9  | T5 → SDSS completo                  | modo=full  | eval=sdss
+2026-05-04 05:09:38 | INFO     | vgg_datasets |   → acc=0.9162  f1=0.8021  [t5_c9.md]
+2026-05-04 05:09:38 | INFO     | vgg_datasets | Avaliando t5_c10 | T5 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 05:11:41 | INFO     | vgg_datasets |   → acc=0.9071  f1=0.8880  [t5_c10.md]
+2026-05-04 05:11:41 | INFO     | vgg_datasets | Relatorio salvo em: /home/alexmrtr/Pucpr/a-look-outside/projeto/docs/vgg16/benchmarks/relatorio.md
+2026-05-04 05:11:41 | INFO     | vgg_datasets | Resultados JSON: /home/alexmrtr/Pucpr/a-look-outside/projeto/docs/vgg16/benchmarks/resultados.json
+2026-05-04 05:11:41 | INFO     | vgg_datasets | Pipeline concluido.
+2026-05-04 05:11:45 | INFO     | vgg_datasets | Pipeline VGG16 × Datasets | fases=[0, 1, 2, 3] | ids=todas
+2026-05-04 05:11:45 | INFO     | vgg_datasets | Checkpoint FT (t2) fixado manualmente: vgg16_sdss_hibrido_ep50_20260502_221730.pth
+2026-05-04 05:11:45 | DEBUG    | vgg_datasets | Pre-popular: t1 → vgg16_sdss_raw_ep50_20260501_173036.pth
+2026-05-04 05:11:45 | DEBUG    | vgg_datasets | Pre-popular: t3 → vgg16_decals_raw_ep50_20260504_000207.pth
+2026-05-04 05:11:45 | DEBUG    | vgg_datasets | Pre-popular: t4 → vgg16_fusao_raw_ep50_20260504_013732.pth
+2026-05-04 05:11:45 | INFO     | vgg_datasets | Dataset fusao OK: dataset/processados/fusao.h5 (3786.8 MB)
+2026-05-04 05:11:45 | INFO     | vgg_datasets | 
+2026-05-04 05:11:45 | INFO     | vgg_datasets | ┌─ TREINO T1: VGG16 treina SDSS/raw
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_sdss_raw_ep50_20260501_173036.pth
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 05:11:45 | INFO     | vgg_datasets | └─ OK
+2026-05-04 05:11:45 | INFO     | vgg_datasets | 
+2026-05-04 05:11:45 | INFO     | vgg_datasets | ┌─ TREINO T2: VGG16 treina SDSS/hibrido
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_sdss_hibrido_ep50_20260502_221730.pth
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 05:11:45 | INFO     | vgg_datasets | └─ OK
+2026-05-04 05:11:45 | INFO     | vgg_datasets | 
+2026-05-04 05:11:45 | INFO     | vgg_datasets | ┌─ TREINO T3: VGG16 treina DECaLS/raw
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_decals_raw_ep50_20260504_000207.pth
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 05:11:45 | INFO     | vgg_datasets | └─ OK
+2026-05-04 05:11:45 | INFO     | vgg_datasets | 
+2026-05-04 05:11:45 | INFO     | vgg_datasets | ┌─ TREINO T4: VGG16 treina fusao
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_fusao_raw_ep50_20260504_013732.pth
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 05:11:45 | INFO     | vgg_datasets | └─ OK
+2026-05-04 05:11:45 | INFO     | vgg_datasets | 
+2026-05-04 05:11:45 | INFO     | vgg_datasets | ┌─ TREINO T5: Fine-tune T2 → fusao (estado da arte)
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Checkpoint existente detectado: vgg16_fusao_raw_ep50_20260504_013732.pth
+2026-05-04 05:11:45 | INFO     | vgg_datasets | │  Pulando treino — usando checkpoint ja disponivel.
+2026-05-04 05:11:45 | INFO     | vgg_datasets | └─ OK
+2026-05-04 05:11:46 | INFO     | vgg_datasets | Avaliando t1_t1  | T1 val SDSS/raw                     | modo=split | eval=sdss
+2026-05-04 05:12:14 | INFO     | vgg_datasets |   → acc=0.8838  f1=0.7600  [t1_t1.md]
+2026-05-04 05:12:14 | INFO     | vgg_datasets | Avaliando t2_t2  | T2 val SDSS/hibrido                 | modo=split | eval=sdss
+2026-05-04 05:13:19 | INFO     | vgg_datasets |   → acc=0.9679  f1=0.9677  [t2_t2.md]
+2026-05-04 05:13:19 | INFO     | vgg_datasets | Avaliando t3_t3  | T3 val DECaLS/raw                   | modo=split | eval=decals
+2026-05-04 05:14:07 | INFO     | vgg_datasets |   → acc=0.8512  f1=0.8268  [t3_t3.md]
+2026-05-04 05:14:07 | INFO     | vgg_datasets | Avaliando t4_t4  | T4 val fusao                        | modo=split | eval=fusao
+2026-05-04 05:15:30 | INFO     | vgg_datasets |   → acc=0.8689  f1=0.8592  [t4_t4.md]
+2026-05-04 05:15:30 | INFO     | vgg_datasets | Avaliando t5_t5  | T5 val fusao (FT)                   | modo=split | eval=fusao
+2026-05-04 05:16:50 | INFO     | vgg_datasets |   → acc=0.8689  f1=0.8592  [t5_t5.md]
+2026-05-04 05:16:50 | INFO     | vgg_datasets | Avaliando t1_c1  | T1 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 05:18:54 | INFO     | vgg_datasets |   → acc=0.0520  f1=0.0377  [t1_c1.md]
+2026-05-04 05:18:54 | INFO     | vgg_datasets | Avaliando t1_c2  | T1 → fusao completo                 | modo=full  | eval=fusao
+2026-05-04 05:23:22 | INFO     | vgg_datasets |   → acc=0.5471  f1=0.4100  [t1_c2.md]
+2026-05-04 05:23:22 | INFO     | vgg_datasets | Avaliando t2_c3  | T2 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 05:25:29 | INFO     | vgg_datasets |   → acc=0.0843  f1=0.0583  [t2_c3.md]
+2026-05-04 05:25:29 | INFO     | vgg_datasets | Avaliando t2_c4  | T2 → fusao completo                 | modo=full  | eval=fusao
+2026-05-04 05:29:52 | INFO     | vgg_datasets |   → acc=0.5744  f1=0.4348  [t2_c4.md]
+2026-05-04 05:29:52 | INFO     | vgg_datasets | Avaliando t3_c5  | T3 → SDSS completo                  | modo=full  | eval=sdss
+2026-05-04 05:31:47 | INFO     | vgg_datasets |   → acc=0.0638  f1=0.0418  [t3_c5.md]
+2026-05-04 05:31:47 | INFO     | vgg_datasets | Avaliando t3_c6  | T3 → fusao completo                 | modo=full  | eval=fusao
+2026-05-04 05:36:12 | INFO     | vgg_datasets |   → acc=0.4459  f1=0.5036  [t3_c6.md]
+2026-05-04 05:36:12 | INFO     | vgg_datasets | Avaliando t4_c7  | T4 → SDSS completo                  | modo=full  | eval=sdss
+2026-05-04 05:38:06 | INFO     | vgg_datasets |   → acc=0.9162  f1=0.8021  [t4_c7.md]
+2026-05-04 05:38:06 | INFO     | vgg_datasets | Avaliando t4_c8  | T4 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 05:40:11 | INFO     | vgg_datasets |   → acc=0.9071  f1=0.8880  [t4_c8.md]
+2026-05-04 05:40:11 | INFO     | vgg_datasets | Avaliando t5_c9  | T5 → SDSS completo                  | modo=full  | eval=sdss
+2026-05-04 05:42:04 | INFO     | vgg_datasets |   → acc=0.9162  f1=0.8021  [t5_c9.md]
+2026-05-04 05:42:04 | INFO     | vgg_datasets | Avaliando t5_c10 | T5 → DECaLS completo                | modo=full  | eval=decals
+2026-05-04 05:44:08 | INFO     | vgg_datasets |   → acc=0.9071  f1=0.8880  [t5_c10.md]
+2026-05-04 05:44:08 | INFO     | vgg_datasets | Relatorio salvo em: /home/alexmrtr/Pucpr/a-look-outside/projeto/docs/vgg16/benchmarks/relatorio.md
+2026-05-04 05:44:08 | INFO     | vgg_datasets | Resultados JSON: /home/alexmrtr/Pucpr/a-look-outside/projeto/docs/vgg16/benchmarks/resultados.json
+2026-05-04 05:44:08 | INFO     | vgg_datasets | Pipeline concluido.

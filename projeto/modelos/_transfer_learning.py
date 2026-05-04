@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import torch
 import torch.nn as nn
@@ -36,6 +36,8 @@ def treinar_two_stage(
     dir_pesos: Path,
     dir_docs: Path,
     usar_amp: bool = False,
+    label_smoothing: float = 0.0,
+    augment_batch: Optional[Callable] = None,
     params: Optional[dict[str, Any]] = None,
     logger: Optional[logging.Logger] = None,
 ) -> HistoricoTreino:
@@ -45,7 +47,7 @@ def treinar_two_stage(
     Stage 2 (épocas seguintes): backbone descongelado com LR menor.
     """
     log = logger or obter_logger(__name__)
-    criterio = nn.CrossEntropyLoss()
+    criterio = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
     scaler = torch.cuda.amp.GradScaler() if usar_amp else None
 
     historico = HistoricoTreino()
@@ -81,7 +83,7 @@ def treinar_two_stage(
         elif scheduler_ativo and epoca > epocas_congelado + 1:
             scheduler.step()
 
-        loss_t, acc_t = _epoch_treino(rede, loader_treino, otimizador, criterio, scaler, dispositivo)
+        loss_t, acc_t = _epoch_treino(rede, loader_treino, otimizador, criterio, scaler, dispositivo, augment_batch)
         loss_v, acc_v = _epoch_val(rede, loader_val, criterio, dispositivo)
 
         historico.perdas_treino.append(loss_t)
@@ -150,11 +152,13 @@ def _params_cabeca(rede: nn.Module):
     return [p for n, p in rede.named_parameters() if _eh_cabeca(n, rede)]
 
 
-def _epoch_treino(rede, loader, otimizador, criterio, scaler, dispositivo):
+def _epoch_treino(rede, loader, otimizador, criterio, scaler, dispositivo, augment_batch=None):
     rede.train()
     total_loss, acertos, total = 0.0, 0, 0
     for imgs, rots in loader:
         imgs, rots = imgs.to(dispositivo, non_blocking=True), rots.to(dispositivo, non_blocking=True)
+        if augment_batch is not None:
+            imgs, rots = augment_batch(imgs, rots)
         otimizador.zero_grad(set_to_none=True)
         if scaler:
             with torch.cuda.amp.autocast():
@@ -173,7 +177,9 @@ def _epoch_treino(rede, loader, otimizador, criterio, scaler, dispositivo):
             otimizador.step()
         bs = rots.size(0)
         total_loss += loss.item() * bs
-        acertos += (logits.argmax(1) == rots).sum().item()
+        # rots pode ser float (MixUp/CutMix) — usa argmax para acerto aproximado
+        alvos = rots.argmax(1) if rots.ndim > 1 else rots
+        acertos += (logits.argmax(1) == alvos).sum().item()
         total += bs
     return total_loss / total, acertos / total
 

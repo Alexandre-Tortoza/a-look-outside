@@ -92,3 +92,27 @@ def obter_transform_avaliacao(
             transforms.Normalize(mean=media, std=desvio),
         ]
     )
+
+
+def obter_transform_treino_vit(
+    tamanho_imagem: int = TAMANHO_PADRAO,
+    media: list[float] = MEDIA_IMAGENET,
+    desvio: list[float] = DESVIO_IMAGENET,
+    rand_augment_ops: int = 2,
+    rand_augment_magnitude: int = 9,
+) -> transforms.Compose:
+    """Pipeline de treino para ViT com RandAugment (sem flips manuais — cobertos pelo RA).
+
+    Args:
+        rand_augment_ops: Número de operações por amostra.
+        rand_augment_magnitude: Magnitude das perturbações (1–30).
+    """
+    return transforms.Compose(
+        [
+            transforms.ToPILImage(),
+            transforms.Resize((tamanho_imagem, tamanho_imagem)),
+            transforms.RandAugment(num_ops=rand_augment_ops, magnitude=rand_augment_magnitude),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=media, std=desvio),
+        ]
+    )

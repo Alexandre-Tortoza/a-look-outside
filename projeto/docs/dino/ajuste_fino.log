@@ -56,3 +56,55 @@
 2026-05-02 17:19:20 | INFO     | modelos.dino.ajuste_fino | Época  28/50 | loss 0.4953 | acc 0.8176 | val_loss 0.4830 | val_acc 0.8350
 2026-05-02 17:19:21 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.8350)
 2026-05-02 17:23:06 | INFO     | modelos.dino.ajuste_fino | Época  29/50 | loss 0.4817 | acc 0.8207 | val_loss 0.4760 | val_acc 0.8301
+2026-05-02 17:26:59 | INFO     | modelos.dino.ajuste_fino | Época  30/50 | loss 0.4740 | acc 0.8260 | val_loss 0.5219 | val_acc 0.8188
+2026-05-02 17:30:48 | INFO     | modelos.dino.ajuste_fino | Época  31/50 | loss 0.4680 | acc 0.8282 | val_loss 0.4737 | val_acc 0.8316
+2026-05-02 17:34:26 | INFO     | modelos.dino.ajuste_fino | Época  32/50 | loss 0.4580 | acc 0.8323 | val_loss 0.5232 | val_acc 0.8234
+2026-05-02 17:38:09 | INFO     | modelos.dino.ajuste_fino | Época  33/50 | loss 0.4498 | acc 0.8342 | val_loss 0.4638 | val_acc 0.8473
+2026-05-02 17:38:10 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.8473)
+2026-05-02 17:41:55 | INFO     | modelos.dino.ajuste_fino | Época  34/50 | loss 0.4444 | acc 0.8385 | val_loss 0.4612 | val_acc 0.8427
+2026-05-02 17:45:35 | INFO     | modelos.dino.ajuste_fino | Época  35/50 | loss 0.4334 | acc 0.8407 | val_loss 0.4794 | val_acc 0.8323
+2026-05-02 17:49:21 | INFO     | modelos.dino.ajuste_fino | Época  36/50 | loss 0.4225 | acc 0.8443 | val_loss 0.4807 | val_acc 0.8292
+2026-05-02 17:53:09 | INFO     | modelos.dino.ajuste_fino | Época  37/50 | loss 0.4153 | acc 0.8490 | val_loss 0.4661 | val_acc 0.8365
+2026-05-02 17:56:56 | INFO     | modelos.dino.ajuste_fino | Época  38/50 | loss 0.4089 | acc 0.8472 | val_loss 0.4515 | val_acc 0.8466
+2026-05-02 18:00:47 | INFO     | modelos.dino.ajuste_fino | Época  39/50 | loss 0.4006 | acc 0.8524 | val_loss 0.4525 | val_acc 0.8479
+2026-05-02 18:00:47 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.8479)
+2026-05-02 18:04:46 | INFO     | modelos.dino.ajuste_fino | Época  40/50 | loss 0.4026 | acc 0.8504 | val_loss 0.4430 | val_acc 0.8473
+2026-05-02 18:08:47 | INFO     | modelos.dino.ajuste_fino | Época  41/50 | loss 0.3916 | acc 0.8554 | val_loss 0.4390 | val_acc 0.8491
+2026-05-02 18:08:48 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.8491)
+2026-05-02 18:12:36 | INFO     | modelos.dino.ajuste_fino | Época  42/50 | loss 0.3814 | acc 0.8571 | val_loss 0.4293 | val_acc 0.8549
+2026-05-02 18:12:36 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.8549)
+2026-05-02 18:16:25 | INFO     | modelos.dino.ajuste_fino | Época  43/50 | loss 0.3780 | acc 0.8596 | val_loss 0.4408 | val_acc 0.8488
+2026-05-02 18:20:17 | INFO     | modelos.dino.ajuste_fino | Época  44/50 | loss 0.3753 | acc 0.8621 | val_loss 0.4374 | val_acc 0.8561
+2026-05-02 18:20:18 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.8561)
+2026-05-03 07:11:34 | INFO     | modelos.dino.ajuste_fino | Stage 1: backbone congelado, treinando cabeça (LR=1.0e-03)
+2026-05-03 07:21:42 | INFO     | modelos.dino.ajuste_fino | Época   1/50 | loss 2.3100 | acc 0.1009 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 07:21:42 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.1000)
+2026-05-03 07:31:42 | INFO     | modelos.dino.ajuste_fino | Época   2/50 | loss 2.3027 | acc 0.0987 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 07:42:09 | INFO     | modelos.dino.ajuste_fino | Época   3/50 | loss 2.3028 | acc 0.0963 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 07:55:46 | INFO     | modelos.dino.ajuste_fino | Época   4/50 | loss 2.3028 | acc 0.0983 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 08:08:41 | INFO     | modelos.dino.ajuste_fino | Época   5/50 | loss 2.3027 | acc 0.1006 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 08:08:41 | INFO     | modelos.dino.ajuste_fino | Stage 2: backbone descongelado (backbone LR=5.0e-06, cabeça LR=1.0e-03)
+2026-05-03 08:23:48 | INFO     | modelos.dino.ajuste_fino | Época   6/50 | loss 2.3028 | acc 0.0987 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 08:39:30 | INFO     | modelos.dino.ajuste_fino | Época   7/50 | loss 2.3027 | acc 0.0996 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 08:55:23 | INFO     | modelos.dino.ajuste_fino | Época   8/50 | loss 2.3028 | acc 0.0990 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 09:11:04 | INFO     | modelos.dino.ajuste_fino | Época   9/50 | loss 2.3028 | acc 0.0956 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 09:26:20 | INFO     | modelos.dino.ajuste_fino | Época  10/50 | loss 2.3027 | acc 0.0979 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 09:42:29 | INFO     | modelos.dino.ajuste_fino | Época  11/50 | loss 2.3027 | acc 0.0991 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 09:42:29 | INFO     | modelos.dino.ajuste_fino | Early stopping após 10 épocas sem melhora.
+2026-05-03 09:42:29 | INFO     | modelos.dino.ajuste_fino | Treino concluído. Épocas: 11 | Melhor val_acc: 0.1000 | Early stop: True
+2026-05-03 12:34:57 | INFO     | modelos.dino.ajuste_fino | Stage 1: backbone congelado, treinando cabeça (LR=1.0e-03)
+2026-05-03 12:45:04 | INFO     | modelos.dino.ajuste_fino | Época   1/50 | loss 2.3086 | acc 0.1014 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 12:45:05 | INFO     | modelos.dino.ajuste_fino |   ✓ Melhor modelo salvo (val_acc=0.1000)
+2026-05-03 12:55:05 | INFO     | modelos.dino.ajuste_fino | Época   2/50 | loss 2.3038 | acc 0.0991 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 13:05:05 | INFO     | modelos.dino.ajuste_fino | Época   3/50 | loss 2.3029 | acc 0.0974 | val_loss 2.3033 | val_acc 0.1000
+2026-05-03 13:15:05 | INFO     | modelos.dino.ajuste_fino | Época   4/50 | loss 2.3031 | acc 0.0981 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 13:25:06 | INFO     | modelos.dino.ajuste_fino | Época   5/50 | loss 2.3027 | acc 0.1007 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 13:25:06 | INFO     | modelos.dino.ajuste_fino | Stage 2: backbone descongelado (backbone LR=5.0e-06, cabeça LR=1.0e-03)
+2026-05-03 13:36:55 | INFO     | modelos.dino.ajuste_fino | Época   6/50 | loss 2.3028 | acc 0.0983 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 13:48:43 | INFO     | modelos.dino.ajuste_fino | Época   7/50 | loss 2.3028 | acc 0.0997 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 14:00:32 | INFO     | modelos.dino.ajuste_fino | Época   8/50 | loss 2.3028 | acc 0.0990 | val_loss 2.3027 | val_acc 0.1000
+2026-05-03 14:12:21 | INFO     | modelos.dino.ajuste_fino | Época   9/50 | loss 2.3028 | acc 0.0956 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 14:24:10 | INFO     | modelos.dino.ajuste_fino | Época  10/50 | loss 2.3027 | acc 0.0979 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 14:35:59 | INFO     | modelos.dino.ajuste_fino | Época  11/50 | loss 2.3027 | acc 0.0991 | val_loss 2.3026 | val_acc 0.1000
+2026-05-03 14:35:59 | INFO     | modelos.dino.ajuste_fino | Early stopping após 10 épocas sem melhora.
+2026-05-03 14:35:59 | INFO     | modelos.dino.ajuste_fino | Treino concluído. Épocas: 11 | Melhor val_acc: 0.1000 | Early stop: True

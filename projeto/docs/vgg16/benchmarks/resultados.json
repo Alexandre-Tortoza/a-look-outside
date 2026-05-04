@@ -1,0 +1,152 @@
+{
+  "t1_t1": {
+    "treino": "t1",
+    "eval": "sdss",
+    "modo": "split",
+    "acuracia": 0.8837565004588559,
+    "f1_macro": 0.7600480635554209,
+    "precisao": 0.7741035249988935,
+    "recall": 0.749145567383051,
+    "descricao": "T1 val SDSS/raw"
+  },
+  "t2_t2": {
+    "treino": "t2",
+    "eval": "sdss",
+    "modo": "split",
+    "acuracia": 0.9678925304878049,
+    "f1_macro": 0.9676825838679912,
+    "precisao": 0.9676344849723948,
+    "recall": 0.9678839711289664,
+    "descricao": "T2 val SDSS/hibrido"
+  },
+  "t3_t3": {
+    "treino": "t3",
+    "eval": "decals",
+    "modo": "split",
+    "acuracia": 0.8511837655016911,
+    "f1_macro": 0.8267704839453016,
+    "precisao": 0.8241849118709217,
+    "recall": 0.8349125709667577,
+    "descricao": "T3 val DECaLS/raw"
+  },
+  "t4_t4": {
+    "treino": "t4",
+    "eval": "fusao",
+    "modo": "split",
+    "acuracia": 0.8689492325855962,
+    "f1_macro": 0.8592140870559426,
+    "precisao": 0.8604445628086405,
+    "recall": 0.8600978261512205,
+    "descricao": "T4 val fusao"
+  },
+  "t5_t5": {
+    "treino": "t5",
+    "eval": "fusao",
+    "modo": "split",
+    "acuracia": 0.8689492325855962,
+    "f1_macro": 0.8592140870559426,
+    "precisao": 0.8604445628086405,
+    "recall": 0.8600978261512205,
+    "descricao": "T5 val fusao (FT)"
+  },
+  "t1_c1": {
+    "treino": "t1",
+    "eval": "decals",
+    "modo": "full",
+    "acuracia": 0.05198466396030672,
+    "f1_macro": 0.03765752726908878,
+    "precisao": 0.03442408653838052,
+    "recall": 0.06674125231592708,
+    "descricao": "T1 → DECaLS completo"
+  },
+  "t1_c2": {
+    "treino": "t1",
+    "eval": "fusao",
+    "modo": "full",
+    "acuracia": 0.5471015409529111,
+    "f1_macro": 0.4100041880354503,
+    "precisao": 0.5433184844206963,
+    "recall": 0.4277949435330378,
+    "descricao": "T1 → fusao completo"
+  },
+  "t2_c3": {
+    "treino": "t2",
+    "eval": "decals",
+    "modo": "full",
+    "acuracia": 0.08434821831303563,
+    "f1_macro": 0.05829691768189736,
+    "precisao": 0.051604014793821054,
+    "recall": 0.11903113857514791,
+    "descricao": "T2 → DECaLS completo"
+  },
+  "t2_c4": {
+    "treino": "t2",
+    "eval": "fusao",
+    "modo": "full",
+    "acuracia": 0.574403481693277,
+    "f1_macro": 0.43480580858102547,
+    "precisao": 0.565447977137634,
+    "recall": 0.4565862747542714,
+    "descricao": "T2 → fusao completo"
+  },
+  "t3_c5": {
+    "treino": "t3",
+    "eval": "sdss",
+    "modo": "full",
+    "acuracia": 0.06380537066789076,
+    "f1_macro": 0.04182683817890178,
+    "precisao": 0.167879415974172,
+    "recall": 0.03666273869176967,
+    "descricao": "T3 → SDSS completo"
+  },
+  "t3_c6": {
+    "treino": "t3",
+    "eval": "fusao",
+    "modo": "full",
+    "acuracia": 0.4458642240833987,
+    "f1_macro": 0.5036341738233727,
+    "precisao": 0.5915977968067623,
+    "recall": 0.5456646370068284,
+    "descricao": "T3 → fusao completo"
+  },
+  "t4_c7": {
+    "treino": "t4",
+    "eval": "sdss",
+    "modo": "full",
+    "acuracia": 0.9161808583887996,
+    "f1_macro": 0.802089607096779,
+    "precisao": 0.8014059022925315,
+    "recall": 0.8037683789155636,
+    "descricao": "T4 → SDSS completo"
+  },
+  "t4_c8": {
+    "treino": "t4",
+    "eval": "decals",
+    "modo": "full",
+    "acuracia": 0.9071380243572396,
+    "f1_macro": 0.8880218911981576,
+    "precisao": 0.9010031562093564,
+    "recall": 0.8903087545772583,
+    "descricao": "T4 → DECaLS completo"
+  },
+  "t5_c9": {
+    "treino": "t5",
+    "eval": "sdss",
+    "modo": "full",
+    "acuracia": 0.9161808583887996,
+    "f1_macro": 0.802089607096779,
+    "precisao": 0.8014059022925315,
+    "recall": 0.8037683789155636,
+    "descricao": "T5 → SDSS completo"
+  },
+  "t5_c10": {
+    "treino": "t5",
+    "eval": "decals",
+    "modo": "full",
+    "acuracia": 0.9071380243572396,
+    "f1_macro": 0.8880218911981576,
+    "precisao": 0.9010031562093564,
+    "recall": 0.8903087545772583,
+    "descricao": "T5 → DECaLS completo"
+  }
+}

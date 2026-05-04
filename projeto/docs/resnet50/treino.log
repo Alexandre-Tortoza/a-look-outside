@@ -43,3 +43,92 @@
 2026-05-01 17:14:40 | INFO     | modelos.resnet50.treino | Época  27/50 | loss 0.1749 | acc 0.9363 | val_loss 0.3296 | val_acc 0.8959
 2026-05-01 17:14:40 | INFO     | modelos.resnet50.treino | Early stopping após 10 épocas sem melhora.
 2026-05-01 17:14:40 | INFO     | modelos.resnet50.treino | Treino concluído. Épocas: 27 | Melhor val_acc: 0.9008 | Early stop: True
+2026-05-02 19:08:19 | INFO     | modelos.resnet50.treino | Stage 1: backbone congelado, treinando cabeça (LR=1.0e-03)
+2026-05-02 19:10:14 | INFO     | modelos.resnet50.treino | Época   1/50 | loss 1.6958 | acc 0.4568 | val_loss 1.5467 | val_acc 0.5196
+2026-05-02 19:10:14 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.5196)
+2026-05-02 19:11:57 | INFO     | modelos.resnet50.treino | Época   2/50 | loss 1.5205 | acc 0.5215 | val_loss 1.4603 | val_acc 0.5515
+2026-05-02 19:11:57 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.5515)
+2026-05-02 19:13:41 | INFO     | modelos.resnet50.treino | Época   3/50 | loss 1.4766 | acc 0.5430 | val_loss 1.4347 | val_acc 0.5703
+2026-05-02 19:13:41 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.5703)
+2026-05-02 19:15:34 | INFO     | modelos.resnet50.treino | Época   4/50 | loss 1.4559 | acc 0.5539 | val_loss 1.4143 | val_acc 0.5828
+2026-05-02 19:15:34 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.5828)
+2026-05-02 19:17:24 | INFO     | modelos.resnet50.treino | Época   5/50 | loss 1.4376 | acc 0.5604 | val_loss 1.3989 | val_acc 0.5892
+2026-05-02 19:17:24 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.5892)
+2026-05-02 19:17:24 | INFO     | modelos.resnet50.treino | Stage 2: backbone descongelado (backbone LR=5.0e-05, cabeça LR=1.0e-03)
+2026-05-02 19:21:35 | INFO     | modelos.resnet50.treino | Época   6/50 | loss 1.1999 | acc 0.6798 | val_loss 1.0338 | val_acc 0.7712
+2026-05-02 19:21:35 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.7712)
+2026-05-02 19:25:45 | INFO     | modelos.resnet50.treino | Época   7/50 | loss 0.9470 | acc 0.8045 | val_loss 0.8434 | val_acc 0.8501
+2026-05-02 19:25:46 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.8501)
+2026-05-02 19:30:03 | INFO     | modelos.resnet50.treino | Época   8/50 | loss 0.8390 | acc 0.8528 | val_loss 0.7748 | val_acc 0.8838
+2026-05-02 19:30:03 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.8838)
+2026-05-02 19:34:06 | INFO     | modelos.resnet50.treino | Época   9/50 | loss 0.7851 | acc 0.8784 | val_loss 0.7408 | val_acc 0.9003
+2026-05-02 19:34:06 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9003)
+2026-05-02 19:38:11 | INFO     | modelos.resnet50.treino | Época  10/50 | loss 0.7487 | acc 0.8935 | val_loss 0.7131 | val_acc 0.9135
+2026-05-02 19:38:11 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9135)
+2026-05-02 19:42:16 | INFO     | modelos.resnet50.treino | Época  11/50 | loss 0.7281 | acc 0.9025 | val_loss 0.6965 | val_acc 0.9171
+2026-05-02 19:42:16 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9171)
+2026-05-02 19:46:21 | INFO     | modelos.resnet50.treino | Época  12/50 | loss 0.7027 | acc 0.9140 | val_loss 0.6830 | val_acc 0.9241
+2026-05-02 19:46:22 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9241)
+2026-05-02 19:50:33 | INFO     | modelos.resnet50.treino | Época  13/50 | loss 0.6859 | acc 0.9211 | val_loss 0.6746 | val_acc 0.9283
+2026-05-02 19:50:33 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9283)
+2026-05-02 19:54:39 | INFO     | modelos.resnet50.treino | Época  14/50 | loss 0.6726 | acc 0.9270 | val_loss 0.6630 | val_acc 0.9303
+2026-05-02 19:54:39 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9303)
+2026-05-02 19:58:40 | INFO     | modelos.resnet50.treino | Época  15/50 | loss 0.6593 | acc 0.9329 | val_loss 0.6663 | val_acc 0.9310
+2026-05-02 19:58:40 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9310)
+2026-05-02 20:02:44 | INFO     | modelos.resnet50.treino | Época  16/50 | loss 0.6490 | acc 0.9380 | val_loss 0.6435 | val_acc 0.9404
+2026-05-02 20:02:44 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9404)
+2026-05-02 20:06:48 | INFO     | modelos.resnet50.treino | Época  17/50 | loss 0.6409 | acc 0.9415 | val_loss 0.6417 | val_acc 0.9415
+2026-05-02 20:06:48 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9415)
+2026-05-02 20:10:58 | INFO     | modelos.resnet50.treino | Época  18/50 | loss 0.6324 | acc 0.9452 | val_loss 0.6367 | val_acc 0.9443
+2026-05-02 20:10:58 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9443)
+2026-05-02 20:14:50 | INFO     | modelos.resnet50.treino | Época  19/50 | loss 0.6244 | acc 0.9474 | val_loss 0.6432 | val_acc 0.9410
+2026-05-02 20:18:41 | INFO     | modelos.resnet50.treino | Época  20/50 | loss 0.6186 | acc 0.9507 | val_loss 0.6264 | val_acc 0.9475
+2026-05-02 20:18:41 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9475)
+2026-05-02 20:22:32 | INFO     | modelos.resnet50.treino | Época  21/50 | loss 0.6126 | acc 0.9541 | val_loss 0.6154 | val_acc 0.9515
+2026-05-02 20:22:32 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9515)
+2026-05-02 20:26:23 | INFO     | modelos.resnet50.treino | Época  22/50 | loss 0.6066 | acc 0.9562 | val_loss 0.6157 | val_acc 0.9516
+2026-05-02 20:26:23 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9516)
+2026-05-02 20:30:14 | INFO     | modelos.resnet50.treino | Época  23/50 | loss 0.6012 | acc 0.9587 | val_loss 0.6111 | val_acc 0.9536
+2026-05-02 20:30:14 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9536)
+2026-05-02 20:34:05 | INFO     | modelos.resnet50.treino | Época  24/50 | loss 0.5974 | acc 0.9606 | val_loss 0.6132 | val_acc 0.9531
+2026-05-02 20:37:56 | INFO     | modelos.resnet50.treino | Época  25/50 | loss 0.5934 | acc 0.9625 | val_loss 0.6079 | val_acc 0.9560
+2026-05-02 20:37:56 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9560)
+2026-05-02 20:41:47 | INFO     | modelos.resnet50.treino | Época  26/50 | loss 0.5908 | acc 0.9635 | val_loss 0.6094 | val_acc 0.9545
+2026-05-02 20:45:38 | INFO     | modelos.resnet50.treino | Época  27/50 | loss 0.5865 | acc 0.9653 | val_loss 0.6053 | val_acc 0.9575
+2026-05-02 20:45:39 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9575)
+2026-05-02 20:49:29 | INFO     | modelos.resnet50.treino | Época  28/50 | loss 0.5830 | acc 0.9666 | val_loss 0.6052 | val_acc 0.9562
+2026-05-02 20:53:20 | INFO     | modelos.resnet50.treino | Época  29/50 | loss 0.5801 | acc 0.9684 | val_loss 0.6056 | val_acc 0.9570
+2026-05-02 20:57:11 | INFO     | modelos.resnet50.treino | Época  30/50 | loss 0.5770 | acc 0.9701 | val_loss 0.6063 | val_acc 0.9571
+2026-05-02 21:01:02 | INFO     | modelos.resnet50.treino | Época  31/50 | loss 0.5736 | acc 0.9703 | val_loss 0.6005 | val_acc 0.9589
+2026-05-02 21:01:02 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9589)
+2026-05-02 21:04:53 | INFO     | modelos.resnet50.treino | Época  32/50 | loss 0.5715 | acc 0.9710 | val_loss 0.6016 | val_acc 0.9593
+2026-05-02 21:04:53 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9593)
+2026-05-02 21:08:44 | INFO     | modelos.resnet50.treino | Época  33/50 | loss 0.5686 | acc 0.9731 | val_loss 0.6025 | val_acc 0.9581
+2026-05-02 21:12:46 | INFO     | modelos.resnet50.treino | Época  34/50 | loss 0.5669 | acc 0.9738 | val_loss 0.5955 | val_acc 0.9615
+2026-05-02 21:12:46 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9615)
+2026-05-02 21:16:54 | INFO     | modelos.resnet50.treino | Época  35/50 | loss 0.5647 | acc 0.9744 | val_loss 0.5974 | val_acc 0.9602
+2026-05-02 21:21:02 | INFO     | modelos.resnet50.treino | Época  36/50 | loss 0.5632 | acc 0.9754 | val_loss 0.5948 | val_acc 0.9613
+2026-05-02 21:25:07 | INFO     | modelos.resnet50.treino | Época  37/50 | loss 0.5618 | acc 0.9767 | val_loss 0.5930 | val_acc 0.9613
+2026-05-02 21:29:13 | INFO     | modelos.resnet50.treino | Época  38/50 | loss 0.5595 | acc 0.9773 | val_loss 0.5929 | val_acc 0.9620
+2026-05-02 21:29:13 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9620)
+2026-05-02 21:33:24 | INFO     | modelos.resnet50.treino | Época  39/50 | loss 0.5575 | acc 0.9781 | val_loss 0.5932 | val_acc 0.9622
+2026-05-02 21:33:24 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9622)
+2026-05-02 21:37:35 | INFO     | modelos.resnet50.treino | Época  40/50 | loss 0.5572 | acc 0.9780 | val_loss 0.5927 | val_acc 0.9621
+2026-05-02 21:41:46 | INFO     | modelos.resnet50.treino | Época  41/50 | loss 0.5567 | acc 0.9783 | val_loss 0.5911 | val_acc 0.9629
+2026-05-02 21:41:46 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9629)
+2026-05-02 21:45:57 | INFO     | modelos.resnet50.treino | Época  42/50 | loss 0.5560 | acc 0.9783 | val_loss 0.5914 | val_acc 0.9631
+2026-05-02 21:45:57 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9631)
+2026-05-02 21:50:08 | INFO     | modelos.resnet50.treino | Época  43/50 | loss 0.5541 | acc 0.9798 | val_loss 0.5910 | val_acc 0.9633
+2026-05-02 21:50:08 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9633)
+2026-05-02 21:54:12 | INFO     | modelos.resnet50.treino | Época  44/50 | loss 0.5538 | acc 0.9800 | val_loss 0.5929 | val_acc 0.9618
+2026-05-02 21:58:09 | INFO     | modelos.resnet50.treino | Época  45/50 | loss 0.5517 | acc 0.9807 | val_loss 0.5923 | val_acc 0.9633
+2026-05-02 22:02:01 | INFO     | modelos.resnet50.treino | Época  46/50 | loss 0.5527 | acc 0.9799 | val_loss 0.5909 | val_acc 0.9635
+2026-05-02 22:02:01 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9635)
+2026-05-02 22:05:53 | INFO     | modelos.resnet50.treino | Época  47/50 | loss 0.5517 | acc 0.9802 | val_loss 0.5910 | val_acc 0.9643
+2026-05-02 22:05:54 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9643)
+2026-05-02 22:09:46 | INFO     | modelos.resnet50.treino | Época  48/50 | loss 0.5517 | acc 0.9806 | val_loss 0.5891 | val_acc 0.9644
+2026-05-02 22:09:46 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9644)
+2026-05-02 22:13:38 | INFO     | modelos.resnet50.treino | Época  49/50 | loss 0.5522 | acc 0.9795 | val_loss 0.5902 | val_acc 0.9644
+2026-05-02 22:17:30 | INFO     | modelos.resnet50.treino | Época  50/50 | loss 0.5515 | acc 0.9805 | val_loss 0.5908 | val_acc 0.9645
+2026-05-02 22:17:30 | INFO     | modelos.resnet50.treino |   ✓ Melhor modelo salvo (val_acc=0.9645)
+2026-05-02 22:17:30 | INFO     | modelos.resnet50.treino | Treino concluído. Épocas: 50 | Melhor val_acc: 0.9645 | Early stop: False
