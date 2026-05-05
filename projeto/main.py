@@ -301,7 +301,7 @@ def _acao_amostras_xai(config: dict) -> None:
 
 
 def _acao_xai_em_lote(config: dict) -> None:
-    """Roda XAI em todas as amostras extraídas e salva grade em docs/{modelo}/xai.png."""
+    """Roda XAI em lote e salva grades em docs/{modelo}/{tratamento}/xai/."""
     import numpy as np
     from PIL import Image
 
@@ -370,7 +370,8 @@ def _acao_xai_em_lote(config: dict) -> None:
 
     print()
     imagens_por_linha = cfg_xai.get("imagens_por_linha", 5)
-    dir_saida_xai = Path("docs") / modelo / "xai"
+    tratamento = _inferir_tratamento_dataset(caminho_pesos)
+    dir_saida_xai = Path("docs") / modelo / tratamento / "xai"
     plotar_grade_xai_por_classe(resultados, dir_saida_xai, imagens_por_linha=imagens_por_linha)
     print(f"Imagens XAI salvas em: {dir_saida_xai}/ (uma por classe)")
 
@@ -586,6 +587,24 @@ def _encontrar_pesos_recentes(modelo: str) -> Path | None:
         return None
     arquivos = sorted(dir_pesos.glob("*.pth"), key=lambda p: p.stat().st_mtime, reverse=True)
     return arquivos[0] if arquivos else None
+
+
+def _inferir_tratamento_dataset(caminho_pesos: Path) -> str:
+    """Extrai a versão/tratamento do dataset a partir do nome do checkpoint."""
+    partes = caminho_pesos.stem.split("_")
+
+    for i, parte in enumerate(partes):
+        if parte.startswith("ep") and parte[2:].isdigit() and i > 0:
+            return partes[i - 1]
+
+    tratamentos_conhecidos = {
+        "raw", "smote", "adasyn", "oversampling", "undersampling", "hibrido", "aumento", "upscale"
+    }
+    for parte in partes:
+        if parte in tratamentos_conhecidos:
+            return parte
+
+    return "desconhecido"
 
 
 # Chaves que controlam estrutura do experimento — não são overrides de hiperparâmetros

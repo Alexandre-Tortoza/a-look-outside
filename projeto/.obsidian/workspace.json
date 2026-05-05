@@ -1,0 +1,200 @@
+{
+  "main": {
+    "id": "feaf2b8c494a6213",
+    "type": "split",
+    "children": [
+      {
+        "id": "8d9eeaa89c65cb50",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2942154eb307f19f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/analise-consolidada.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "analise-consolidada"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "019e3ac01b6f6401",
+    "type": "split",
+    "children": [
+      {
+        "id": "c6dfc5e76db29d0a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8292e836284f3d8d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b6e755ca0ea8a6c7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "5c16f45500fd2609",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "f6f893b31cae3335",
+    "type": "split",
+    "children": [
+      {
+        "id": "12576db361dc5679",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "efbd4b5ce25fd73e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/analise-consolidada.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for analise-consolidada"
+            }
+          },
+          {
+            "id": "d6f94597469d404c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/analise-consolidada.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from analise-consolidada"
+            }
+          },
+          {
+            "id": "f25d18c04b1b17a8",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "b9849d33a56074b7",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "84528a880cf67d3b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/analise-consolidada.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of analise-consolidada"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "2942154eb307f19f",
+  "lastOpenFiles": [
+    "docs/vgg16/benchmarks/t3_c5.md",
+    "docs/analise-consolidada.md",
+    "docs/vgg16/benchmarks/t1_c2.md",
+    "docs/vgg16/benchmarks/relatorio.md",
+    "docs/vgg16/resultados.md",
+    "docs/xai/vgg16/classe_02/img_00000.png",
+    "docs/xai/vgg16/classe_03/img_00000.png",
+    "docs/xai/vgg16/classe_00/img_00000.png",
+    "docs/analise.md",
+    "docs/analise-2.md",
+    "explain-me-dnb.md"
+  ]
+}

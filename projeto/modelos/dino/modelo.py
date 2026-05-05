@@ -23,16 +23,33 @@ class _CabecaLinear(nn.Module):
         return self.fc(x)
 
 
-class _ModeloDinoHub(nn.Module):
-    """DINOv2 via torch.hub + cabeça linear."""
+class _CabecaMLP(nn.Module):
+    """Cabeça de classificação MLP: Linear → GELU → Dropout → Linear."""
 
-    def __init__(self, backbone_nome: str, num_classes: int) -> None:
+    def __init__(self, dim_entrada: int, num_classes: int, dropout: float = 0.1) -> None:
+        super().__init__()
+        dim_oculto = max(dim_entrada // 2, num_classes * 4)
+        self.layers = nn.Sequential(
+            nn.Linear(dim_entrada, dim_oculto),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(dim_oculto, num_classes),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.layers(x)
+
+
+class _ModeloDinoHub(nn.Module):
+    """DINOv2 via torch.hub + cabeça de classificação (linear ou MLP)."""
+
+    def __init__(self, backbone_nome: str, num_classes: int, cabeca_mlp: bool = False) -> None:
         super().__init__()
         self.backbone = torch.hub.load(
             "facebookresearch/dinov2", backbone_nome, pretrained=True
         )
         dim = self.backbone.embed_dim
-        self.head = _CabecaLinear(dim, num_classes)
+        self.head = _CabecaMLP(dim, num_classes) if cabeca_mlp else _CabecaLinear(dim, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         features = self.backbone(x)
@@ -90,11 +107,13 @@ class DinoGalaxy(ClassificadorGalaxias):
         backbone_hub: str = "dinov2_vitb14",
         backbone_scratch: str = "vit_small_patch16_224",
         tamanho_projecao: int = 65536,
+        cabeca_mlp: bool = False,
     ) -> None:
         self.modo = modo
         self.backbone_hub = backbone_hub
         self.backbone_scratch = backbone_scratch
         self.tamanho_projecao = tamanho_projecao
+        self.cabeca_mlp = cabeca_mlp
 
     @property
     def nome(self) -> str:
@@ -118,7 +137,7 @@ class DinoGalaxy(ClassificadorGalaxias):
 
     def construir(self, num_classes: int = 10, tamanho_imagem: int = 224) -> nn.Module:
         if self.modo == "hub":
-            return _ModeloDinoHub(self.backbone_hub, num_classes)
+            return _ModeloDinoHub(self.backbone_hub, num_classes, cabeca_mlp=self.cabeca_mlp)
         return _ModeloDinoScratch(self.backbone_scratch, num_classes, self.tamanho_projecao)
 
     def explicar(

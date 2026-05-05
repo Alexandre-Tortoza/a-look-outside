@@ -70,6 +70,7 @@ def ajustar_fino(
         modo=params.get("modo", "hub"),
         backbone_hub=params.get("backbone", "dinov2_vitb14"),
         backbone_scratch=params.get("backbone_scratch", "vit_small_patch16_224"),
+        cabeca_mlp=params.get("cabeca_mlp", False),
     )
     rede = classificador.construir(num_classes=num_classes, tamanho_imagem=params["tamanho_imagem"])
 
@@ -91,6 +92,7 @@ def ajustar_fino(
         salvar_checkpoints=params.get("salvar_pesos", True),
         scheduler_ativo=params.get("scheduler_ativo", True),
         peso_decay=params.get("peso_decay", 1e-4),
+        label_smoothing=params.get("label_smoothing", 0.0),
         dispositivo=dispositivo, dir_pesos=Path("pesos"), dir_docs=Path("docs"),
         usar_amp=amp, params=params, logger=log,
     )

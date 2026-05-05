@@ -72,6 +72,7 @@ def treinar(config_override: Optional[dict[str, Any]] = None) -> HistoricoTreino
         salvar_checkpoints=params.get("salvar_pesos", True),
         scheduler_ativo=params.get("scheduler_ativo", True),
         peso_decay=params.get("peso_decay", 1e-4),
+        label_smoothing=params.get("label_smoothing", 0.0),
         dispositivo=dispositivo, dir_pesos=Path("pesos"), dir_docs=Path("docs"),
         usar_amp=amp, params=params, logger=log,
     )

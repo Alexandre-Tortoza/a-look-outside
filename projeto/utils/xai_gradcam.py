@@ -61,24 +61,34 @@ def grad_cam(
     camada = _obter_modulo(rede, nome_camada)
 
     def salvar_ativacao(_, __, saida: torch.Tensor) -> None:
-        ativacoes.append(saida.detach())
+        ativacoes.append(saida.detach().clone())
+        if not saida.requires_grad:
+            raise RuntimeError(
+                f"A camada '{nome_camada}' não está rastreando gradientes para Grad-CAM."
+            )
 
-    def salvar_gradiente(_, grad_entrada, grad_saida) -> None:
-        gradientes.append(grad_saida[0].detach())
+        def capturar_gradiente(grad: torch.Tensor) -> None:
+            gradientes.append(grad.detach().clone())
+
+        # Hook no tensor de saída evita conflito com ops inplace em hooks de módulo.
+        saida.register_hook(capturar_gradiente)
 
     hook_fwd = camada.register_forward_hook(salvar_ativacao)
-    hook_bwd = camada.register_full_backward_hook(salvar_gradiente)
 
     try:
         logits = rede(entrada)
         if classe_alvo is None:
             classe_alvo = int(logits.argmax(dim=1).item())
 
-        rede.zero_grad()
+        rede.zero_grad(set_to_none=True)
         logits[0, classe_alvo].backward()
     finally:
         hook_fwd.remove()
-        hook_bwd.remove()
+
+    if not ativacoes:
+        raise RuntimeError(f"Nenhuma ativação capturada para a camada '{nome_camada}'.")
+    if not gradientes:
+        raise RuntimeError(f"Nenhum gradiente capturado para a camada '{nome_camada}'.")
 
     ativ = ativacoes[0]     # (1, C, H', W')
     grad = gradientes[0]    # (1, C, H', W')

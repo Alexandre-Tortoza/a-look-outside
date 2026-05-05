@@ -20,9 +20,11 @@ class ViTGalaxy(ClassificadorGalaxias):
         self,
         backbone: str = "vit_base_patch16_224",
         pretrained: bool = True,
+        drop_path_rate: float = 0.0,
     ) -> None:
         self.backbone = backbone
         self.pretrained = pretrained
+        self.drop_path_rate = drop_path_rate
 
     @property
     def nome(self) -> str:
@@ -50,6 +52,7 @@ class ViTGalaxy(ClassificadorGalaxias):
             pretrained=self.pretrained,
             num_classes=num_classes,
             img_size=tamanho_imagem,
+            drop_path_rate=self.drop_path_rate,
         )
 
     def explicar(

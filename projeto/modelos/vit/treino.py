@@ -11,7 +11,7 @@ from modelos._transfer_learning import treinar_two_stage
 from modelos.vit.modelo import ViTGalaxy
 from modelos.treinador import HistoricoTreino
 from pre_processamento.divisao_treino_teste import dividir_estratificado
-from pre_processamento.normalizacao import obter_transform_avaliacao, obter_transform_treino
+from pre_processamento.normalizacao import obter_transform_avaliacao, obter_transform_treino, obter_transform_treino_vit
 from utils.config_loader import carregar_config, obter_config_modelo, obter_config_recursos
 from utils.experimento import gerar_nome_experimento
 from utils.logger import obter_logger
@@ -47,9 +47,14 @@ def treinar(config_override: Optional[dict[str, Any]] = None) -> HistoricoTreino
     imagens, rotulos = CarregadorDataset().carregar(nome_dataset)
     divisao = dividir_estratificado(imagens, rotulos, semente=params["seed"])
 
+    transform_treino = (
+        obter_transform_treino_vit(tamanho_imagem=params["tamanho_imagem"])
+        if params.get("rand_augment")
+        else obter_transform_treino(tamanho_imagem=params["tamanho_imagem"])
+    )
     loader_treino, loader_val, _ = criar_dataloaders(
         divisao,
-        obter_transform_treino(tamanho_imagem=params["tamanho_imagem"]),
+        transform_treino,
         obter_transform_avaliacao(tamanho_imagem=params["tamanho_imagem"]),
         batch_size, num_workers,
     )
@@ -58,10 +63,28 @@ def treinar(config_override: Optional[dict[str, Any]] = None) -> HistoricoTreino
     rede = ViTGalaxy(
         backbone=params.get("backbone", "vit_base_patch16_224"),
         pretrained=params.get("pretrained", True),
+        drop_path_rate=params.get("drop_path_rate", 0.0),
     ).construir(num_classes=num_classes, tamanho_imagem=params["tamanho_imagem"])
 
     dispositivo = configurar_dispositivo(cfg_rec)
     amp = usar_mixed_precision(cfg_rec, dispositivo)
+
+    # MixUp / CutMix por batch (aplicado no loop de treino)
+    augment_batch = None
+    if params.get("mixup_alpha") or params.get("cutmix_alpha"):
+        try:
+            import random
+            import torchvision.transforms.v2 as T2
+            candidatos = []
+            if params.get("cutmix_alpha"):
+                candidatos.append(T2.CutMix(num_classes=num_classes, alpha=params["cutmix_alpha"]))
+            if params.get("mixup_alpha"):
+                candidatos.append(T2.MixUp(num_classes=num_classes, alpha=params["mixup_alpha"]))
+
+            def augment_batch(imgs, rots):  # noqa: E731
+                return random.choice(candidatos)(imgs, rots)
+        except Exception as exc:  # torchvision < 0.15 ou outro erro
+            log.warning("MixUp/CutMix indisponível (%s) — ignorado.", exc)
 
     return treinar_two_stage(
         rede=rede, nome_experimento=nome_exp,
@@ -73,6 +96,8 @@ def treinar(config_override: Optional[dict[str, Any]] = None) -> HistoricoTreino
         salvar_checkpoints=params.get("salvar_pesos", True),
         scheduler_ativo=params.get("scheduler_ativo", True),
         peso_decay=params.get("peso_decay", 1e-4),
+        label_smoothing=params.get("label_smoothing", 0.0),
+        augment_batch=augment_batch,
         dispositivo=dispositivo, dir_pesos=Path("pesos"), dir_docs=Path("docs"),
         usar_amp=amp, params=params, logger=log,
     )
