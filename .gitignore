@@ -1,1 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and local tools
+.venv/
+venv/
+.env
+.env.*
+
+# Jupyter and editor cache
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+# Datasets and generated data
 *.h5
+*.hdf5
+*.npz
+*.npy
+dataset/raw/
+dataset/processed/
+
+# Machine learning artifacts
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.joblib
+machine-learning/runs/
+machine-learning/my-computer.yaml
+
+# Generated reports and explanation artifacts
+docs/
+xai/*/*/samples/
+xai/*/*/xai/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store
