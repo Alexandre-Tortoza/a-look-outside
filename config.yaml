@@ -1,0 +1,97 @@
+paths:
+  raw_dataset_directory: dataset/raw
+  processed_dataset_directory: dataset/processed
+  machine_learning_run_directory: machine-learning/runs
+  machine_learning_computer_configuration_file: machine-learning/my-computer.yaml
+  documentation_directory: docs
+  xai_output_directory: xai
+
+random_seed: 42
+
+class_names: []
+
+training:
+  epoch_count: 50
+  early_stopping_patience: 8
+  batch_size: 32
+  image_size: 224
+  random_seed: 42
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
+
+models:
+  k_nearest_neighbors:
+    n_neighbors: 5
+    mode: pixels
+
+evaluation:
+  misclassified_samples_per_pair: 10
+  top_k_values: [3, 5]
+  calibration_bin_count: 10
+
+leaderboard:
+  primary_metric: balanced_accuracy
+  secondary_metric: accuracy
+  jsonl_filename: runs.jsonl
+  heatmap_metrics:
+    - accuracy
+    - balanced_accuracy
+    - macro_f1
+    - cohen_kappa
+    - matthews_correlation_coefficient
+    - roc_auc_macro
+    - log_loss
+
+dataset_analysis:
+  output_directory: dataset/docs
+  sample_count_per_class: 5
+  intensity_histogram_bin_count: 64
+
+benchmarks:
+  galaxy_full:
+    description: "Galaxy10 full baseline — 5 modelos x 4 variantes"
+    datasets:
+      sources: [sdss]
+      include_raw: true
+      balancing_variants:
+        - methods: [smote]
+        - methods: [random_under_sampling]
+        - methods: [smote, random_under_sampling]
+    models: [dino, vgg16, efficientnet, resnet50, k_nearest_neighbors]
+    knn_modes: [pixels, features]
+    generate_dataset_analysis: true
+    generate_xai: true
+    generate_recommendations: true
+
+  smoke:
+    description: "Smoke test rapido (KNN pixels + ResNet50, sem variantes)"
+    datasets:
+      sources: [sdss]
+      include_raw: true
+      balancing_variants: []
+    models: [k_nearest_neighbors, resnet50]
+    knn_modes: [pixels]
+    generate_dataset_analysis: false
+    generate_xai: false
+    generate_recommendations: true
+
+pipelines:
+  baseline:
+    model_names:
+      - dino
+      - vgg16
+      - efficientnet
+      - resnet50
+      - k_nearest_neighbors
+    dataset_names:
+      - sdss_raw
+      - decals_raw
+      - sdss_smote
+      - decals_smote
+
+xai:
+  default_methods:
+    - gradient_class_activation_mapping
+    - nearest_neighbors
+  knn:
+    panel_neighbor_count: 5

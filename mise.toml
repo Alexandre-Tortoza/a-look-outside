@@ -1,0 +1,23 @@
+[tools]
+python = "3.12"
+uv = "latest"
+
+[tasks.sync]
+description = "Resolve and install dependencies"
+run = "uv sync"
+
+[tasks.app]
+description = "Run the root orchestrator"
+run = "uv run python main.py"
+
+[tasks.dataset]
+description = "Run the dataset balancing CLI"
+run = "uv run python dataset/main.py"
+
+[tasks.ml]
+description = "Run the machine learning CLI"
+run = "uv run python machine-learning/main.py"
+
+[tasks.xai]
+description = "Run the XAI CLI"
+run = "uv run python xai/main.py"

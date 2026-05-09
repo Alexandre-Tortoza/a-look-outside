@@ -38,6 +38,7 @@ machine-learning/my-computer.yaml
 
 # Generated reports and explanation artifacts
 docs/
+dataset/docs/
 xai/*/*/samples/
 xai/*/*/xai/
 
