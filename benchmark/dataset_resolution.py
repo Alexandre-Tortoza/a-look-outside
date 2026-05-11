@@ -15,6 +15,7 @@ from dataset.balancing.registry import get_method  # noqa: E402
 from dataset.input_output import (  # noqa: E402
     class_distribution,
     read_dataset,
+    resolve_class_names,
     write_dataset,
 )
 
@@ -42,13 +43,12 @@ def resolve_benchmark_datasets(
     )
     analysis_section = config.get("dataset_analysis") or {}
     docs_root = project_root / analysis_section.get(
-        "output_directory", "dataset/docs"
+        "output_directory", "docs/dataset"
     )
     sample_count_per_class = int(analysis_section.get("sample_count_per_class", 5))
     histogram_bin_count = int(
         analysis_section.get("intensity_histogram_bin_count", 64)
     )
-    class_names = list(config.get("class_names") or [])
     random_seed = int(config.get("random_seed", 42))
 
     datasets_spec = benchmark_spec.get("datasets") or {}
@@ -85,7 +85,7 @@ def resolve_benchmark_datasets(
                     dataset_label=entry.dataset_label,
                     source_path=raw_path,
                     docs_root=docs_root,
-                    class_names=class_names,
+                    class_names=resolve_class_names(config.get("class_names"), source),
                     sample_count_per_class=sample_count_per_class,
                     histogram_bin_count=histogram_bin_count,
                     random_seed=random_seed,
@@ -140,7 +140,7 @@ def resolve_benchmark_datasets(
                     dataset_label=entry.dataset_label,
                     source_path=output_path,
                     docs_root=docs_root,
-                    class_names=class_names,
+                    class_names=resolve_class_names(config.get("class_names"), source),
                     sample_count_per_class=sample_count_per_class,
                     histogram_bin_count=histogram_bin_count,
                     random_seed=random_seed,

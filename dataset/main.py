@@ -22,6 +22,7 @@ from dataset.input_output import (  # noqa: E402
     derive_dataset_label,
     list_available_datasets,
     read_dataset,
+    resolve_class_names,
     write_dataset,
 )
 
@@ -220,7 +221,7 @@ def _run_dataset_analysis(
     histogram_bin_count = int(
         analysis_section.get("intensity_histogram_bin_count", 64)
     )
-    class_names = list(config.get("class_names") or [])
+    class_names = resolve_class_names(config.get("class_names"), dataset_label)
     random_seed = int(config.get("random_seed", 42))
 
     return generate_dataset_analysis(
@@ -238,7 +239,7 @@ def _run_dataset_analysis(
 
 def _docs_root(config: dict[str, Any]) -> Path:
     analysis_section = config.get("dataset_analysis") or {}
-    raw_value = analysis_section.get("output_directory", "dataset/docs")
+    raw_value = analysis_section.get("output_directory", "docs/dataset")
     docs_root = PROJECT_ROOT / raw_value
     docs_root.mkdir(parents=True, exist_ok=True)
     return docs_root
@@ -246,32 +247,34 @@ def _docs_root(config: dict[str, Any]) -> Path:
 
 def _prompt_datasets(datasets: list[DatasetEntry]) -> list[DatasetEntry]:
     choices = [
-        Choice(value=entry, name=entry.display_label) for entry in datasets
+        Choice(value=i, name=entry.display_label) for i, entry in enumerate(datasets)
     ]
-    return inquirer.checkbox(
+    selected_indices: list[int] = inquirer.checkbox(
         message="Selecione os datasets de entrada (espaco para marcar, enter para confirmar):",
         choices=choices,
         instruction="(use as setas e a barra de espaco)",
         validate=lambda result: len(result) > 0,
         invalid_message="Selecione ao menos um dataset.",
     ).execute()
+    return [datasets[i] for i in selected_indices]
 
 
 def _prompt_methods() -> list[BalancingMethod]:
     methods = list_methods()
     choices = [
-        Choice(value=method, name=method.display_name) for method in methods
+        Choice(value=i, name=method.display_name) for i, method in enumerate(methods)
     ]
     console.print(
         "[dim]A ordem de selecao define a ordem de aplicacao dos metodos.[/dim]"
     )
-    return inquirer.checkbox(
+    selected_indices: list[int] = inquirer.checkbox(
         message="Selecione os metodos de balanceamento (em ordem):",
         choices=choices,
         instruction="(use as setas e a barra de espaco)",
         validate=lambda result: len(result) > 0,
         invalid_message="Selecione ao menos um metodo.",
     ).execute()
+    return [methods[i] for i in selected_indices]
 
 
 def _build_plan_table(

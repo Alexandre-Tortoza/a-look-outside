@@ -5,7 +5,18 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from dataset.balancing import random_over_sampling, random_under_sampling, smote
+from dataset.balancing import (
+    augmentation_brightness,
+    augmentation_combined,
+    augmentation_elastic,
+    augmentation_flip,
+    augmentation_noise,
+    augmentation_perspective,
+    augmentation_rotation,
+    random_over_sampling,
+    random_under_sampling,
+    smote,
+)
 
 BalancingFunction = Callable[[np.ndarray, np.ndarray, int], tuple[np.ndarray, np.ndarray]]
 
@@ -32,6 +43,41 @@ _BALANCING_METHODS: dict[str, BalancingMethod] = {
         name="random_under_sampling",
         display_name="Random under-sampling (drop majority samples)",
         apply=random_under_sampling.apply,
+    ),
+    "augmentation_rotation": BalancingMethod(
+        name="augmentation_rotation",
+        display_name="Augmentation: rotation (0-360 degrees)",
+        apply=augmentation_rotation.apply,
+    ),
+    "augmentation_flip": BalancingMethod(
+        name="augmentation_flip",
+        display_name="Augmentation: horizontal / vertical flip",
+        apply=augmentation_flip.apply,
+    ),
+    "augmentation_brightness": BalancingMethod(
+        name="augmentation_brightness",
+        display_name="Augmentation: brightness and contrast jitter",
+        apply=augmentation_brightness.apply,
+    ),
+    "augmentation_noise": BalancingMethod(
+        name="augmentation_noise",
+        display_name="Augmentation: Gaussian noise injection",
+        apply=augmentation_noise.apply,
+    ),
+    "augmentation_elastic": BalancingMethod(
+        name="augmentation_elastic",
+        display_name="Augmentation: elastic deformation + grid distortion",
+        apply=augmentation_elastic.apply,
+    ),
+    "augmentation_perspective": BalancingMethod(
+        name="augmentation_perspective",
+        display_name="Augmentation: perspective warp + shift/scale",
+        apply=augmentation_perspective.apply,
+    ),
+    "augmentation_combined": BalancingMethod(
+        name="augmentation_combined",
+        display_name="Augmentation: combined (geometry + photometry + noise + deformation)",
+        apply=augmentation_combined.apply,
     ),
 }
 

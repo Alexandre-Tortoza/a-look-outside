@@ -43,7 +43,7 @@ def generate_documentation(
 ) -> Path:
     run_label = inputs.run_directory.name
     output_directory = (
-        documentation_root / inputs.model_name / f"{run_label}-{inputs.dataset_name}"
+        documentation_root / "models" / inputs.model_name / f"{run_label}-{inputs.dataset_name}"
     )
     output_directory.mkdir(parents=True, exist_ok=True)
 

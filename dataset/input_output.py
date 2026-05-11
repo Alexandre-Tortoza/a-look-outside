@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import h5py
 import numpy as np
@@ -80,6 +80,19 @@ def list_available_datasets(
 
 def derive_dataset_label(entry: DatasetEntry) -> str:
     return f"{entry.name}-raw" if entry.origin == "raw" else entry.name
+
+
+def resolve_class_names(class_names_config: Any, dataset_name: str) -> list[str]:
+    """Return the class name list for a given dataset.
+
+    Supports both a flat list (same names for all datasets) and a dict keyed by
+    base dataset name (e.g. ``{"sdss": [...], "decals": [...]}``)."""
+    if isinstance(class_names_config, list):
+        return list(class_names_config)
+    if isinstance(class_names_config, dict):
+        base = dataset_name.replace("-", "_").split("_")[0]
+        return list(class_names_config.get(base) or [])
+    return []
 
 
 def class_distribution(labels: np.ndarray) -> dict[int, int]:

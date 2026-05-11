@@ -66,12 +66,20 @@ class DeepLearningAdapter(ABC):
         model = self.build_model(splits.num_classes, splits.image_size).to(device)
         self._model = model
 
-        criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(
-            model.parameters(), lr=learning_rate, weight_decay=weight_decay
+        criterion = self.build_criterion(
+            splits=splits,
+            configuration=configuration,
+            device=device,
         )
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="min", factor=0.5, patience=2
+        optimizer = self.build_optimizer(
+            model=model,
+            configuration=configuration,
+            learning_rate=learning_rate,
+            weight_decay=weight_decay,
+        )
+        scheduler = self.build_scheduler(
+            optimizer=optimizer,
+            configuration=configuration,
         )
         scaler = GradScaler(device.type, enabled=amp_enabled)
 
@@ -125,6 +133,34 @@ class DeepLearningAdapter(ABC):
             self._best_state_dict = copy.deepcopy(model.state_dict())
 
         return history
+
+    def build_criterion(
+        self,
+        splits: DatasetSplits,
+        configuration: dict[str, Any],
+        device: torch.device,
+    ) -> nn.Module:
+        return nn.CrossEntropyLoss()
+
+    def build_optimizer(
+        self,
+        model: nn.Module,
+        configuration: dict[str, Any],
+        learning_rate: float,
+        weight_decay: float,
+    ) -> torch.optim.Optimizer:
+        return torch.optim.Adam(
+            model.parameters(), lr=learning_rate, weight_decay=weight_decay
+        )
+
+    def build_scheduler(
+        self,
+        optimizer: torch.optim.Optimizer,
+        configuration: dict[str, Any],
+    ) -> torch.optim.lr_scheduler.ReduceLROnPlateau:
+        return torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=2
+        )
 
     def evaluate(
         self,

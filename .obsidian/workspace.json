@@ -1,0 +1,204 @@
+{
+  "main": {
+    "id": "d474f7b6f91f4895",
+    "type": "split",
+    "children": [
+      {
+        "id": "9bdb77ce2a434778",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "56b6002d74f63611",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "docs/leaderboard_accuracy.png"
+              },
+              "icon": "lucide-image",
+              "title": "leaderboard_accuracy"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "d2bd17d46054528b",
+    "type": "split",
+    "children": [
+      {
+        "id": "50dcc9324055479b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "37270270ff69ec60",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "26945999235d4cc6",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "0894d8129ff8a728",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "fd193d9a79626168",
+    "type": "split",
+    "children": [
+      {
+        "id": "4c927cf07818aa63",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d4c07bf6d8705ccc",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/leaderboard_accuracy.png",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for leaderboard_accuracy"
+            }
+          },
+          {
+            "id": "5682b738be14d966",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/leaderboard_accuracy.png",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from leaderboard_accuracy"
+            }
+          },
+          {
+            "id": "e349dd8a023b60ff",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "af288cf91837532a",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "18be09a707a33451",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/leaderboard_accuracy.png",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of leaderboard_accuracy"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "37270270ff69ec60",
+  "lastOpenFiles": [
+    "machine-learning/__pycache__/pipeline.cpython-312.pyc.140403909860528",
+    "docs/dataset/sdss_smote/summary.md",
+    "docs/dataset/sdss_smote/value_check.md",
+    "docs/dataset/sdss_smote/sample_mosaic.png",
+    "docs/dataset/sdss_smote/class_distribution.png",
+    "docs/dataset/sdss_smote/class_balance.png",
+    "docs/models/dino/dino-sdss_smote-10-05-2026-sdss_smote/error_analysis.md",
+    "docs/models/dino/dino-sdss_smote-10-05-2026-sdss_smote/per_class_accuracy.png",
+    "docs/models/dino/dino-sdss_smote-10-05-2026-sdss_smote/metrics.md",
+    "docs/leaderboard.md",
+    "docs/models/dino/dino-decals_raw-10-05-2026-decals_raw/confusion_matrix.png",
+    "docs/models/dino/dino-decals_raw-10-05-2026-decals_raw/classification_report.md",
+    "docs/models/dino/dino-decals_raw-10-05-2026-decals_raw/class_distribution.png",
+    "docs/models/dino/dino-decals_raw-10-05-2026-decals_raw/calibration_plot.png",
+    "docs/leaderboard_accuracy.png",
+    "docs/leaderboard_balanced_accuracy.png",
+    "docs/leaderboard_cohen_kappa.png"
+  ]
+}

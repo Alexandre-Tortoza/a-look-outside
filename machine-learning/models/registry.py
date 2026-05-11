@@ -20,7 +20,7 @@ class ModelInfo:
 
 
 _FACTORIES: dict[str, Callable[..., ModelAdapter]] = {
-    "dino": lambda **_: DinoAdapter(),
+    "dino": lambda **kwargs: DinoAdapter(**kwargs),
     "vgg16": lambda **_: VGG16Adapter(),
     "efficientnet": lambda **_: EfficientNetAdapter(),
     "resnet50": lambda **_: ResNet50Adapter(),
@@ -30,7 +30,7 @@ _FACTORIES: dict[str, Callable[..., ModelAdapter]] = {
 }
 
 _INFO: dict[str, ModelInfo] = {
-    "dino": ModelInfo("dino", "DINO ViT-S/16 (timm)", True),
+    "dino": ModelInfo("dino", "DINOv2 ViT-S/14 (timm)", True),
     "vgg16": ModelInfo("vgg16", "VGG16 (torchvision ImageNet)", True),
     "efficientnet": ModelInfo(
         "efficientnet", "EfficientNet-B0 (torchvision ImageNet)", True

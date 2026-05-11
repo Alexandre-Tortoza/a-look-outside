@@ -27,6 +27,7 @@ from metric_computation import (  # noqa: E402
     compute_bootstrap_intervals,
     compute_error_analysis,
 )
+from dataset.input_output import resolve_class_names  # noqa: E402
 from models._base import EvaluationResult, TrainingHistory  # noqa: E402
 from models.registry import build_adapter, get_model_info  # noqa: E402
 from run_storage import (  # noqa: E402
@@ -87,10 +88,10 @@ def run_pipeline(
     num_workers = resolve_worker_count(computer_configuration)
     pin_memory = device.type == "cuda"
 
-    class_names = list(configuration.get("class_names") or [])
     results: list[RunResult] = []
 
     for dataset_name in dataset_names:
+        class_names = resolve_class_names(configuration.get("class_names"), dataset_name)
         dataset_path = resolve_dataset_path(
             dataset_name, raw_directory, processed_directory
         )
@@ -154,6 +155,7 @@ def _run_single(
     class_names: list[str],
 ) -> RunResult:
     info = get_model_info(model_spec.name)
+    factory_kwargs = _merge_factory_kwargs(configuration, model_spec)
     run_directory = create_run_directory(runs_root, model_spec.name, dataset_name)
     logger = setup_run_logger(run_directory, name=f"{model_spec.name}.{dataset_name}")
     logger.info("run directory: %s", run_directory)
@@ -166,13 +168,13 @@ def _run_single(
         "active_run": {
             "model_name": model_spec.name,
             "dataset_name": dataset_name,
-            "factory_kwargs": model_spec.factory_kwargs,
+            "factory_kwargs": factory_kwargs,
         },
         "computer_configuration": computer_configuration,
     }
     dump_effective_config(run_directory, effective_configuration)
 
-    adapter = build_adapter(model_spec.name, **model_spec.factory_kwargs)
+    adapter = build_adapter(model_spec.name, **factory_kwargs)
     history = adapter.fit(
         splits=splits,
         configuration=configuration,
@@ -357,3 +359,16 @@ def _run_single(
         evaluation=evaluation,
         history=history,
     )
+
+
+def _merge_factory_kwargs(
+    configuration: dict[str, Any],
+    model_spec: ModelSpec,
+) -> dict[str, Any]:
+    model_configuration = (configuration.get("models") or {}).get(model_spec.name) or {}
+    config_kwargs = {
+        key: value
+        for key, value in model_configuration.items()
+        if key != "fine_tuning"
+    }
+    return {**config_kwargs, **model_spec.factory_kwargs}

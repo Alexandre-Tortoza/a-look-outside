@@ -86,15 +86,16 @@ def run(config: dict[str, Any]) -> None:
 
 
 def _prompt_runs(run_artifacts: list[RunArtifact]) -> list[RunArtifact]:
-    return inquirer.checkbox(
+    selected_indices: list[int] = inquirer.checkbox(
         message="Selecione as runs:",
         choices=[
-            Choice(value=artifact, name=artifact.display_label)
-            for artifact in run_artifacts
+            Choice(value=i, name=artifact.display_label)
+            for i, artifact in enumerate(run_artifacts)
         ],
         validate=lambda result: len(result) > 0,
         invalid_message="Selecione ao menos uma run.",
     ).execute()
+    return [run_artifacts[i] for i in selected_indices]
 
 
 def _prompt_methods(config: dict[str, Any]) -> list[XaiMethod]:
@@ -102,20 +103,20 @@ def _prompt_methods(config: dict[str, Any]) -> list[XaiMethod]:
     defaults = (config.get("xai") or {}).get("default_methods") or [
         method.name for method in available_methods
     ]
-    choices = [
-        Choice(
-            value=method,
-            name=method.display_name,
-            enabled=method.name in defaults,
-        )
-        for method in available_methods
-    ]
-    return inquirer.checkbox(
+    selected_indices: list[int] = inquirer.checkbox(
         message="Selecione os metodos XAI (apenas os aplicaveis ao modelo de cada run rodam):",
-        choices=choices,
+        choices=[
+            Choice(
+                value=i,
+                name=method.display_name,
+                enabled=method.name in defaults,
+            )
+            for i, method in enumerate(available_methods)
+        ],
         validate=lambda result: len(result) > 0,
         invalid_message="Selecione ao menos um metodo.",
     ).execute()
+    return [available_methods[i] for i in selected_indices]
 
 
 def _print_plan(
@@ -123,7 +124,7 @@ def _print_plan(
     methods: list[XaiMethod],
     paths: dict[str, Any],
 ) -> None:
-    xai_root = paths.get("xai_output_directory", "xai")
+    xai_root = paths.get("xai_output_directory", "docs/xai")
     table = Table(title="Plano de execucao XAI")
     table.add_column("Run", style="cyan")
     table.add_column("Modelo", style="magenta")

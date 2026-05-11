@@ -4,11 +4,33 @@ paths:
   machine_learning_run_directory: machine-learning/runs
   machine_learning_computer_configuration_file: machine-learning/my-computer.yaml
   documentation_directory: docs
-  xai_output_directory: xai
+  xai_output_directory: docs/xai
 
 random_seed: 42
 
-class_names: []
+class_names:
+  sdss:
+    - disk_face_on_no_spiral          # 0
+    - smooth_completely_round         # 1
+    - smooth_in_between_round         # 2
+    - smooth_cigar_shaped             # 3
+    - disk_edge_on_rounded_bulge      # 4
+    - disk_edge_on_boxy_bulge         # 5
+    - disk_edge_on_no_bulge           # 6
+    - disk_face_on_tight_spiral       # 7
+    - disk_face_on_medium_spiral      # 8
+    - disk_face_on_loose_spiral       # 9
+  decals:
+    - disturbed                       # 0
+    - merging                         # 1
+    - round_smooth                    # 2
+    - in_between_round_smooth         # 3
+    - cigar_shaped_smooth             # 4
+    - barred_spiral                   # 5
+    - unbarred_tight_spiral           # 6
+    - unbarred_loose_spiral           # 7
+    - edge_on_no_bulge                # 8
+    - edge_on_with_bulge              # 9
 
 training:
   epoch_count: 50
@@ -20,6 +42,18 @@ training:
   weight_decay: 1.0e-4
 
 models:
+  dino:
+    model_name: vit_small_patch14_dinov2
+    pretrained: true
+    fine_tuning:
+      backbone_learning_rate: 3.0e-5
+      head_learning_rate: 3.0e-4
+      weight_decay: 5.0e-2
+      label_smoothing: 5.0e-2
+      class_weighting: sqrt_inverse_frequency
+      scheduler_factor: 0.5
+      scheduler_patience: 2
+      minimum_learning_rate: 1.0e-6
   k_nearest_neighbors:
     n_neighbors: 5
     mode: pixels
@@ -43,7 +77,7 @@ leaderboard:
     - log_loss
 
 dataset_analysis:
-  output_directory: dataset/docs
+  output_directory: docs/dataset
   sample_count_per_class: 5
   intensity_histogram_bin_count: 64
 

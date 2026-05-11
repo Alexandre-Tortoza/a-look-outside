@@ -12,6 +12,7 @@ for path in (str(PROJECT_ROOT), str(MACHINE_LEARNING_ROOT)):
     if path not in sys.path:
         sys.path.insert(0, path)
 
+from dataset.input_output import resolve_class_names  # noqa: E402
 from models.registry import get_model_info  # noqa: E402
 
 from xai.artifact_storage import RunArtifact, output_directories  # noqa: E402
@@ -36,7 +37,7 @@ def generate_for_run(
     logger: logging.Logger,
 ) -> ExplanationResult:
     paths = config.get("paths") or {}
-    xai_root = PROJECT_ROOT / paths.get("xai_output_directory", "xai")
+    xai_root = PROJECT_ROOT / paths.get("xai_output_directory", "docs/xai")
 
     info = get_model_info(run_artifact.model_name)
     applicable_methods = [method for method in methods if method.applies_to(info)]
@@ -47,7 +48,7 @@ def generate_for_run(
         dataset_name=run_artifact.dataset_name,
     )
 
-    class_names = list(config.get("class_names") or [])
+    class_names = resolve_class_names(config.get("class_names"), run_artifact.dataset_name)
     logger.info(
         "extracting test samples for %s | %s",
         run_artifact.model_name, run_artifact.dataset_name,

@@ -56,10 +56,6 @@ def generate_dataset_analysis(
     _plot_pixel_intensity_histogram(
         output_directory, images, intensity_histogram_bin_count, dataset_label
     )
-    _plot_mean_image_overall(output_directory, images, dataset_label)
-    _plot_mean_image_per_class(
-        output_directory, images, labels, num_classes, class_label_lookup, dataset_label
-    )
     _plot_sample_mosaic(
         output_directory,
         images,
@@ -272,7 +268,6 @@ def _write_summary_markdown(
         "- `value_check.md`: integrity check report.",
         "- `class_distribution.png`, `class_balance.png`",
         "- `pixel_intensity_histogram.png`",
-        "- `mean_image_overall.png`, `mean_image_per_class.png`",
         "- `sample_mosaic.png`",
     ])
     (directory / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -397,58 +392,6 @@ def _plot_pixel_intensity_histogram(
     axis.grid(True, alpha=0.3)
     figure.tight_layout()
     figure.savefig(directory / "pixel_intensity_histogram.png", dpi=150)
-    plt.close(figure)
-
-
-def _plot_mean_image_overall(
-    directory: Path, images: np.ndarray, dataset_label: str
-) -> None:
-    mean_image = images.astype(np.float32).mean(axis=0)
-    if np.issubdtype(images.dtype, np.integer):
-        mean_image = mean_image / float(np.iinfo(images.dtype).max)
-    figure, axis = plt.subplots(figsize=(4, 4))
-    axis.imshow(np.clip(mean_image, 0.0, 1.0))
-    axis.set_title(f"Mean image — {dataset_label}")
-    axis.axis("off")
-    figure.tight_layout()
-    figure.savefig(directory / "mean_image_overall.png", dpi=150)
-    plt.close(figure)
-
-
-def _plot_mean_image_per_class(
-    directory: Path,
-    images: np.ndarray,
-    labels: np.ndarray,
-    num_classes: int,
-    class_label_lookup: list[str],
-    dataset_label: str,
-) -> None:
-    if num_classes == 0:
-        return
-    columns = min(5, num_classes)
-    rows = (num_classes + columns - 1) // columns
-    figure, axes = plt.subplots(rows, columns, figsize=(2.4 * columns, 2.6 * rows))
-    axes_flat = np.atleast_1d(axes).ravel()
-
-    for class_index in range(num_classes):
-        mask = labels == class_index
-        axis = axes_flat[class_index]
-        if mask.sum() == 0:
-            axis.set_visible(False)
-            continue
-        mean_image = images[mask].astype(np.float32).mean(axis=0)
-        if np.issubdtype(images.dtype, np.integer):
-            mean_image = mean_image / float(np.iinfo(images.dtype).max)
-        axis.imshow(np.clip(mean_image, 0.0, 1.0))
-        axis.set_title(f"{class_label_lookup[class_index]}\n(n={int(mask.sum())})", fontsize=9)
-        axis.axis("off")
-
-    for unused_index in range(num_classes, len(axes_flat)):
-        axes_flat[unused_index].set_visible(False)
-
-    figure.suptitle(f"Mean image per class — {dataset_label}")
-    figure.tight_layout()
-    figure.savefig(directory / "mean_image_per_class.png", dpi=150)
     plt.close(figure)
 
 

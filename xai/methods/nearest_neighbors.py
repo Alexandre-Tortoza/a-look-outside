@@ -31,6 +31,7 @@ from data_loading import (  # noqa: E402
 )
 from models.k_nearest_neighbors import _build_feature_extractor  # noqa: E402
 
+from dataset.input_output import resolve_class_names  # noqa: E402
 from xai.artifact_storage import class_label  # noqa: E402
 from xai.sample_extraction import ExtractedSamples  # noqa: E402
 
@@ -55,7 +56,8 @@ def apply(
 
     training = run_config.get("training") or {}
     image_size = int(training.get("image_size", 224))
-    class_names = list(run_config.get("class_names") or [])
+    dataset_name = (run_config.get("active_run") or {}).get("dataset_name", "")
+    class_names = resolve_class_names(run_config.get("class_names"), dataset_name)
     train_images = samples.split.train_images
     train_labels = samples.split.train_labels
 
