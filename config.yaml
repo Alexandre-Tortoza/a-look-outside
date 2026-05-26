@@ -8,6 +8,11 @@ paths:
 
 random_seed: 42
 
+split_ratios:
+  train: 0.70
+  validation: 0.15
+  test: 0.15
+
 class_names:
   sdss:
     - disk_face_on_no_spiral          # 0
@@ -83,16 +88,13 @@ dataset_analysis:
 
 benchmarks:
   galaxy_full:
-    description: "Galaxy10 full baseline — 5 modelos x 4 variantes"
+    description: "Galaxy10 baseline — 3 modelos x 2 datasets x raw+smote"
     datasets:
-      sources: [sdss]
+      sources: [sdss, decals]
       include_raw: true
       balancing_variants:
         - methods: [smote]
-        - methods: [random_under_sampling]
-        - methods: [smote, random_under_sampling]
-    models: [dino, vgg16, efficientnet, resnet50, k_nearest_neighbors]
-    knn_modes: [pixels, features]
+    models: [dino, efficientnet, resnet50]
     generate_dataset_analysis: true
     generate_xai: true
     generate_recommendations: true
@@ -108,6 +110,23 @@ benchmarks:
     generate_dataset_analysis: false
     generate_xai: false
     generate_recommendations: true
+
+  cross_dataset_federated:
+    description: "DINOv2 cross-dataset SDSS/DECaLS + FedAvg"
+    experiment: cross_dataset_federated
+    datasets: [sdss_raw, decals_raw]
+    top_models: [dino]
+    primary_metric: balanced_accuracy
+    federated:
+      rounds: 3
+      local_epochs: 1
+
+  everything:
+    description: "Roda baseline completo, XAI, recomendacoes, cross-dataset e federated"
+    experiment: sequence
+    steps:
+      - galaxy_full
+      - cross_dataset_federated
 
 pipelines:
   baseline:

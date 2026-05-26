@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 from typing import Any
@@ -28,7 +29,11 @@ from benchmark.orchestrator import (  # noqa: E402
 console = Console()
 
 
-def run(config: dict[str, Any]) -> None:
+def run(
+    config: dict[str, Any],
+    benchmark_name: str | None = None,
+    assume_yes: bool = False,
+) -> None:
     benchmarks = config.get("benchmarks") or {}
     if not benchmarks:
         console.print(
@@ -37,21 +42,27 @@ def run(config: dict[str, Any]) -> None:
         )
         return
 
-    benchmark_name = inquirer.select(
-        message="Selecione o benchmark:",
-        choices=[
-            Choice(
-                value=name,
-                name=f"{name} — {(spec or {}).get('description', '')}",
-            )
-            for name, spec in benchmarks.items()
-        ],
-    ).execute()
+    if benchmark_name is None:
+        benchmark_name = inquirer.select(
+            message="Selecione o benchmark:",
+            choices=[
+                Choice(
+                    value=name,
+                    name=f"{name} — {(spec or {}).get('description', '')}",
+                )
+                for name, spec in benchmarks.items()
+            ],
+        ).execute()
+    elif benchmark_name not in benchmarks:
+        available = ", ".join(sorted(benchmarks))
+        raise KeyError(f"benchmark '{benchmark_name}' not found. available: {available}")
 
     benchmark_spec = benchmarks[benchmark_name]
     _print_plan(benchmark_name, benchmark_spec, config)
 
-    if not inquirer.confirm(message="Confirmar execucao?", default=True).execute():
+    if not assume_yes and not inquirer.confirm(
+        message="Confirmar execucao?", default=True
+    ).execute():
         console.print("[yellow]Execucao cancelada.[/yellow]")
         return
 
@@ -80,6 +91,34 @@ def _print_plan(
     benchmark_spec: dict[str, Any],
     config: dict[str, Any],
 ) -> None:
+    if benchmark_spec.get("experiment") == "sequence":
+        summary_table = Table(title=f"Plano de execucao — {benchmark_name}")
+        summary_table.add_column("Item", style="cyan")
+        summary_table.add_column("Valor")
+        summary_table.add_row("Experiment", "sequence")
+        summary_table.add_row("Steps", " -> ".join(benchmark_spec.get("steps") or []))
+        console.print(summary_table)
+        return
+
+    if benchmark_spec.get("experiment") == "cross_dataset_federated":
+        summary_table = Table(title=f"Plano de execucao — {benchmark_name}")
+        summary_table.add_column("Item", style="cyan")
+        summary_table.add_column("Valor")
+        summary_table.add_row("Experiment", "cross_dataset_federated")
+        summary_table.add_row(
+            "Datasets", ", ".join(benchmark_spec.get("datasets") or [])
+        )
+        summary_table.add_row(
+            "Top model count", str(benchmark_spec.get("top_model_count", 3))
+        )
+        federated = benchmark_spec.get("federated") or {}
+        summary_table.add_row("FedAvg rounds", str(federated.get("rounds", 3)))
+        summary_table.add_row(
+            "Local epochs", str(federated.get("local_epochs", 1))
+        )
+        console.print(summary_table)
+        return
+
     datasets_spec = benchmark_spec.get("datasets") or {}
     sources = list(datasets_spec.get("sources") or [])
     include_raw = bool(datasets_spec.get("include_raw", True))
@@ -177,5 +216,22 @@ def _load_config() -> dict[str, Any]:
         return yaml.safe_load(handle) or {}
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run declarative benchmarks.")
+    parser.add_argument(
+        "--benchmark",
+        "-b",
+        help="Benchmark name from config.yaml, e.g. everything.",
+    )
+    parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Run without the interactive confirmation prompt.",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    run(_load_config())
+    args = _parse_args()
+    run(_load_config(), benchmark_name=args.benchmark, assume_yes=args.yes)

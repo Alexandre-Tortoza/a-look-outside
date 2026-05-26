@@ -12,9 +12,9 @@ for path in (str(PROJECT_ROOT), str(MACHINE_LEARNING_ROOT)):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from dataset.input_output import resolve_class_names  # noqa: E402
 from models.registry import get_model_info  # noqa: E402
 
+from dataset.input_output import resolve_class_names  # noqa: E402
 from xai.artifact_storage import RunArtifact, output_directories  # noqa: E402
 from xai.methods.registry import XaiMethod  # noqa: E402
 from xai.sample_extraction import extract_test_samples  # noqa: E402

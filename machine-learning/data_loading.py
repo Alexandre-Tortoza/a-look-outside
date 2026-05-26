@@ -94,19 +94,33 @@ def stratified_train_val_test_split(
     images: np.ndarray,
     labels: np.ndarray,
     random_seed: int,
+    train_ratio: float = 0.70,
+    validation_ratio: float = 0.15,
+    test_ratio: float = 0.15,
 ) -> StratifiedSplit:
+    ratio_sum = train_ratio + validation_ratio + test_ratio
+    if not np.isclose(ratio_sum, 1.0):
+        raise ValueError(
+            "split ratios must sum to 1.0, got "
+            f"{train_ratio:.4f}+{validation_ratio:.4f}+{test_ratio:.4f}={ratio_sum:.4f}"
+        )
+    if min(train_ratio, validation_ratio, test_ratio) <= 0:
+        raise ValueError("split ratios must all be positive")
+
     labels = labels.astype(np.int64)
+    holdout_ratio = validation_ratio + test_ratio
     train_images, holdout_images, train_labels, holdout_labels = train_test_split(
         images,
         labels,
-        test_size=0.30,
+        test_size=holdout_ratio,
         random_state=random_seed,
         stratify=labels,
     )
+    test_fraction_of_holdout = test_ratio / holdout_ratio
     val_images, test_images, val_labels, test_labels = train_test_split(
         holdout_images,
         holdout_labels,
-        test_size=0.50,
+        test_size=test_fraction_of_holdout,
         random_state=random_seed,
         stratify=holdout_labels,
     )
@@ -128,8 +142,33 @@ def build_data_loaders(
     num_workers: int,
     random_seed: int,
     pin_memory: bool,
+    split_ratios: dict[str, float] | None = None,
 ) -> DatasetSplits:
-    split = stratified_train_val_test_split(images, labels, random_seed)
+    ratios = split_ratios or {}
+    split = stratified_train_val_test_split(
+        images,
+        labels,
+        random_seed,
+        train_ratio=float(ratios.get("train", 0.70)),
+        validation_ratio=float(ratios.get("validation", 0.15)),
+        test_ratio=float(ratios.get("test", 0.15)),
+    )
+    return build_data_loaders_from_split(
+        split=split,
+        image_size=image_size,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
+
+
+def build_data_loaders_from_split(
+    split: StratifiedSplit,
+    image_size: int,
+    batch_size: int,
+    num_workers: int,
+    pin_memory: bool,
+) -> DatasetSplits:
     train_images = split.train_images
     train_labels = split.train_labels
     val_images = split.val_images
@@ -150,7 +189,8 @@ def build_data_loaders(
     val_loader = DataLoader(val_dataset, shuffle=False, **loader_kwargs)
     test_loader = DataLoader(test_dataset, shuffle=False, **loader_kwargs)
 
-    num_classes = int(labels.max()) + 1 if len(labels) else 0
+    all_labels = np.concatenate([train_labels, val_labels, test_labels])
+    num_classes = int(all_labels.max()) + 1 if len(all_labels) else 0
 
     return DatasetSplits(
         train_loader=train_loader,

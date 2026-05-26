@@ -27,7 +27,6 @@ from metric_computation import (  # noqa: E402
     compute_bootstrap_intervals,
     compute_error_analysis,
 )
-from dataset.input_output import resolve_class_names  # noqa: E402
 from models._base import EvaluationResult, TrainingHistory  # noqa: E402
 from models.registry import build_adapter, get_model_info  # noqa: E402
 from run_storage import (  # noqa: E402
@@ -43,7 +42,7 @@ from run_storage import (  # noqa: E402
     setup_run_logger,
 )
 
-from dataset.input_output import read_dataset  # noqa: E402
+from dataset.input_output import read_dataset, resolve_class_names  # noqa: E402
 
 
 @dataclass
@@ -67,7 +66,7 @@ def run_pipeline(
     dataset_names: list[str],
     configuration: dict[str, Any],
     computer_configuration: dict[str, Any],
-    on_run_complete: "Callable[[RunResult], None] | None" = None,
+    on_run_complete: Callable[[RunResult], None] | None = None,
 ) -> list[RunResult]:
     paths = configuration.get("paths", {})
     raw_directory = PROJECT_ROOT / paths.get("raw_dataset_directory", "dataset/raw")
@@ -104,6 +103,7 @@ def run_pipeline(
             num_workers=num_workers,
             random_seed=random_seed,
             pin_memory=pin_memory,
+            split_ratios=configuration.get("split_ratios"),
         )
 
         for model_spec in model_specs:

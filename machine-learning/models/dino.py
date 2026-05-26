@@ -4,9 +4,9 @@ from typing import Any
 
 import timm
 import torch
+from data_loading import DatasetSplits
 from torch import nn
 
-from data_loading import DatasetSplits
 from models._deep_learning_base import DeepLearningAdapter
 
 DINO_V2_MODEL_NAME = "vit_small_patch14_dinov2"

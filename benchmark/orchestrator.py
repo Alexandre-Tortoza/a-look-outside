@@ -16,6 +16,7 @@ for path in (str(PROJECT_ROOT), str(MACHINE_LEARNING_ROOT)):
     if path not in sys.path:
         sys.path.insert(0, path)
 
+from cross_dataset_federated import run_experiment as run_cross_dataset_federated  # noqa: E402
 from pipeline import ModelSpec, RunResult, run_pipeline  # noqa: E402
 
 from benchmark.dataset_resolution import (  # noqa: E402
@@ -52,6 +53,70 @@ def run_benchmark(
         )
     benchmark_spec = benchmarks[benchmark_name]
     logger = _build_logger(console)
+
+    if benchmark_spec.get("experiment") == "sequence":
+        step_names = list(benchmark_spec.get("steps") or [])
+        if not step_names:
+            raise ValueError(f"sequence benchmark '{benchmark_name}' has no steps")
+        if benchmark_name in step_names:
+            raise ValueError(f"sequence benchmark '{benchmark_name}' cannot include itself")
+
+        resolved_datasets: list[ResolvedDataset] = []
+        run_results: list[RunResult] = []
+        insights: list[Insight] = []
+        stage_durations: dict[str, float] = {}
+
+        for step_name in step_names:
+            console.rule(f"[bold]Sequence step — {step_name}")
+            step_result = run_benchmark(
+                benchmark_name=step_name,
+                config=config,
+                computer_configuration=computer_configuration,
+                project_root=project_root,
+                console=console,
+            )
+            resolved_datasets.extend(step_result.resolved_datasets)
+            run_results.extend(step_result.run_results)
+            insights.extend(step_result.insights)
+            for stage_name, duration in step_result.stage_durations_seconds.items():
+                stage_durations[f"{step_name}.{stage_name}"] = duration
+
+        return BenchmarkResult(
+            benchmark_name=benchmark_name,
+            resolved_datasets=resolved_datasets,
+            run_results=run_results,
+            insights=insights,
+            stage_durations_seconds=stage_durations,
+        )
+
+    if benchmark_spec.get("experiment") == "cross_dataset_federated":
+        console.rule("[bold]Cross-dataset + Federated DINO")
+        experiment_result = run_cross_dataset_federated(
+            benchmark_spec=benchmark_spec,
+            config=config,
+            computer_configuration=computer_configuration,
+            project_root=project_root,
+            console=console,
+            logger=logger,
+        )
+        return BenchmarkResult(
+            benchmark_name=benchmark_name,
+            resolved_datasets=[],
+            run_results=[],
+            insights=[
+                Insight(
+                    severity="info",
+                    scope="benchmark",
+                    title="Cross-dataset/federated experiment complete",
+                    detail=(
+                        f"Top models: {', '.join(experiment_result.top_model_names)}. "
+                        f"Cross runs: {len(experiment_result.cross_dataset_runs)}. "
+                        f"Federated run: {experiment_result.federated_run_directory}."
+                    ),
+                )
+            ],
+            stage_durations_seconds={},
+        )
 
     paths = config.get("paths") or {}
     docs_root = project_root / paths.get("documentation_directory", "docs")
