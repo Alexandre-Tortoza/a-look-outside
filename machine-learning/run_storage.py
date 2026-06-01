@@ -108,14 +108,19 @@ def build_runs_jsonl_record(
     history_early_stopped: bool,
     total_test_samples: int,
     manifest: RunManifest,
+    balance_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     top_k = aggregate_metrics.get("top_k_accuracy") or {}
+    robust_evaluation = _is_robust_evaluation_dataset(dataset_name)
     return {
         "run_directory_name": run_directory.name,
         "run_directory_path": str(run_directory),
         "documentation_directory": str(documentation_directory),
         "model_name": model_name,
         "dataset_name": dataset_name,
+        "robust_evaluation": robust_evaluation,
+        "evaluation_dataset_kind": "natural" if robust_evaluation else "processed",
+        "training_balance": balance_metadata or {},
         "is_deep_learning": is_deep_learning,
         "started_at": manifest.started_at,
         "completed_at": manifest.completed_at,
@@ -149,6 +154,16 @@ def build_runs_jsonl_record(
         "dataset_size_bytes": manifest.dataset_size_bytes,
         "uv_lock_sha256": manifest.uv_lock_sha256,
     }
+
+
+def _is_robust_evaluation_dataset(dataset_name: str) -> bool:
+    processed_markers = (
+        "_smote",
+        "_random_over_sampling",
+        "_random_under_sampling",
+        "_augmentation_",
+    )
+    return not any(marker in dataset_name for marker in processed_markers)
 
 
 def dump_predictions_csv(

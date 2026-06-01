@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import timm
@@ -40,10 +41,13 @@ class DinoAdapter(DeepLearningAdapter):
         self,
         model_name: str = DINO_V2_MODEL_NAME,
         pretrained: bool = True,
+        initial_checkpoint: str | None = None,
     ) -> None:
         super().__init__()
         self.model_name = model_name
         self.pretrained = pretrained
+        if initial_checkpoint is not None:
+            self._initial_checkpoint = Path(initial_checkpoint)
 
     def build_model(self, num_classes: int, image_size: int) -> nn.Module:
         if "dinov2" not in self.model_name:

@@ -1,6 +1,6 @@
 # Dataset analysis — sdss_smote
 
-- Source path: `/home/alexmrtr/Pucpr/a-look-outside/dataset/processed/sdss_smote.h5`
+- Source path: `/home/alexmrtr/a-look-outside/dataset/processed/sdss_smote.h5`
 - Sample count: **69970**
 - Number of classes: **10**
 - Image shape (H, W, C): [69, 69, 3]

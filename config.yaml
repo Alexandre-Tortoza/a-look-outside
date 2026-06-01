@@ -45,6 +45,18 @@ training:
   random_seed: 42
   learning_rate: 1.0e-4
   weight_decay: 1.0e-4
+  loss: cross_entropy
+  class_weighting: sqrt_inverse_frequency
+  label_smoothing: 0.0
+  focal_gamma: 2.0
+  resume_from_checkpoint: true
+
+training_balance:
+  enabled: true
+  apply_to: train_only
+  methods: [random_over_sampling]
+  datasets: [sdss_raw, decals_raw]
+  models: [dino]
 
 models:
   dino:
@@ -87,14 +99,25 @@ dataset_analysis:
   intensity_histogram_bin_count: 64
 
 benchmarks:
+  robust_full:
+    description: "Robust baseline — raw SDSS/DECaLS com balanceamento apenas no treino"
+    datasets:
+      sources: [sdss, decals]
+      include_raw: true
+      balancing_variants: []
+    models: [dino]
+    generate_dataset_analysis: true
+    generate_xai: true
+    generate_recommendations: true
+
   galaxy_full:
-    description: "Galaxy10 baseline — 3 modelos x 2 datasets x raw+smote"
+    description: "Legacy comparison — 3 modelos x 2 datasets x raw+smote"
     datasets:
       sources: [sdss, decals]
       include_raw: true
       balancing_variants:
         - methods: [smote]
-    models: [dino, efficientnet, resnet50]
+    models: [dino]
     generate_dataset_analysis: true
     generate_xai: true
     generate_recommendations: true
@@ -105,8 +128,7 @@ benchmarks:
       sources: [sdss]
       include_raw: true
       balancing_variants: []
-    models: [k_nearest_neighbors, resnet50]
-    knn_modes: [pixels]
+    models: [dino]
     generate_dataset_analysis: false
     generate_xai: false
     generate_recommendations: true
@@ -122,9 +144,10 @@ benchmarks:
       local_epochs: 1
 
   everything:
-    description: "Roda baseline completo, XAI, recomendacoes, cross-dataset e federated"
+    description: "Roda benchmark robusto, comparacao legada, XAI, recomendacoes, cross-dataset e federated"
     experiment: sequence
     steps:
+      - robust_full
       - galaxy_full
       - cross_dataset_federated
 
@@ -132,15 +155,9 @@ pipelines:
   baseline:
     model_names:
       - dino
-      - vgg16
-      - efficientnet
-      - resnet50
-      - k_nearest_neighbors
     dataset_names:
       - sdss_raw
       - decals_raw
-      - sdss_smote
-      - decals_smote
 
 xai:
   default_methods:

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+
+from dataset.balancing.registry import get_method
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
@@ -26,6 +29,7 @@ class DatasetSplits:
     test_labels: np.ndarray
     image_size: int
     num_classes: int
+    balance_metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class GalaxyImageDataset(Dataset):
@@ -143,6 +147,9 @@ def build_data_loaders(
     random_seed: int,
     pin_memory: bool,
     split_ratios: dict[str, float] | None = None,
+    training_balance_config: dict[str, Any] | None = None,
+    dataset_name: str | None = None,
+    model_name: str | None = None,
 ) -> DatasetSplits:
     ratios = split_ratios or {}
     split = stratified_train_val_test_split(
@@ -153,12 +160,20 @@ def build_data_loaders(
         validation_ratio=float(ratios.get("validation", 0.15)),
         test_ratio=float(ratios.get("test", 0.15)),
     )
+    split, balance_metadata = _apply_train_only_balance(
+        split=split,
+        training_balance_config=training_balance_config,
+        dataset_name=dataset_name,
+        model_name=model_name,
+        random_seed=random_seed,
+    )
     return build_data_loaders_from_split(
         split=split,
         image_size=image_size,
         batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=pin_memory,
+        balance_metadata=balance_metadata,
     )
 
 
@@ -168,6 +183,7 @@ def build_data_loaders_from_split(
     batch_size: int,
     num_workers: int,
     pin_memory: bool,
+    balance_metadata: dict[str, Any] | None = None,
 ) -> DatasetSplits:
     train_images = split.train_images
     train_labels = split.train_labels
@@ -204,7 +220,97 @@ def build_data_loaders_from_split(
         test_labels=test_labels,
         image_size=image_size,
         num_classes=num_classes,
+        balance_metadata=balance_metadata or {
+            "enabled": False,
+            "applied": False,
+            "methods": [],
+        },
     )
+
+
+def _apply_train_only_balance(
+    *,
+    split: StratifiedSplit,
+    training_balance_config: dict[str, Any] | None,
+    dataset_name: str | None,
+    model_name: str | None,
+    random_seed: int,
+) -> tuple[StratifiedSplit, dict[str, Any]]:
+    metadata = {
+        "enabled": False,
+        "applied": False,
+        "methods": [],
+        "apply_to": "none",
+        "train_distribution_before": _class_distribution(split.train_labels),
+        "train_distribution_after": _class_distribution(split.train_labels),
+        "validation_distribution": _class_distribution(split.val_labels),
+        "test_distribution": _class_distribution(split.test_labels),
+    }
+    config = training_balance_config or {}
+    if not bool(config.get("enabled", False)):
+        return split, metadata
+
+    apply_to = str(config.get("apply_to", "train_only"))
+    if apply_to != "train_only":
+        raise ValueError(
+            "training_balance.apply_to only supports 'train_only'; "
+            f"got {apply_to!r}"
+        )
+
+    if not _matches_filter(config.get("datasets"), dataset_name):
+        metadata["enabled"] = True
+        metadata["apply_to"] = apply_to
+        return split, metadata
+    if not _matches_filter(config.get("models"), model_name):
+        metadata["enabled"] = True
+        metadata["apply_to"] = apply_to
+        return split, metadata
+
+    methods = [str(method_name) for method_name in config.get("methods") or []]
+    if not methods:
+        metadata["enabled"] = True
+        metadata["apply_to"] = apply_to
+        return split, metadata
+
+    train_images = split.train_images
+    train_labels = split.train_labels
+    for method_name in methods:
+        method = get_method(method_name)
+        train_images, train_labels = method.apply(train_images, train_labels, random_seed)
+
+    balanced_split = StratifiedSplit(
+        train_images=train_images,
+        train_labels=train_labels,
+        val_images=split.val_images,
+        val_labels=split.val_labels,
+        test_images=split.test_images,
+        test_labels=split.test_labels,
+    )
+    metadata.update({
+        "enabled": True,
+        "applied": True,
+        "methods": methods,
+        "apply_to": apply_to,
+        "train_distribution_after": _class_distribution(train_labels),
+    })
+    return balanced_split, metadata
+
+
+def _matches_filter(raw_filter: Any, value: str | None) -> bool:
+    if raw_filter in (None, "", "all"):
+        return True
+    if isinstance(raw_filter, str):
+        return raw_filter == value
+    values = {str(item) for item in raw_filter}
+    return "all" in values or (value is not None and value in values)
+
+
+def _class_distribution(labels: np.ndarray) -> dict[int, int]:
+    unique_labels, counts = np.unique(labels.astype(np.int64), return_counts=True)
+    return {
+        int(label): int(count)
+        for label, count in zip(unique_labels, counts, strict=True)
+    }
 
 
 def flatten_normalized(images: np.ndarray) -> np.ndarray:

@@ -1,6 +1,6 @@
 # Dataset analysis — decals-raw
 
-- Source path: `/home/alexmrtr/Pucpr/a-look-outside/dataset/raw/decals.h5`
+- Source path: `/home/alexmrtr/a-look-outside/dataset/raw/decals.h5`
 - Sample count: **17736**
 - Number of classes: **10**
 - Image shape (H, W, C): [256, 256, 3]

@@ -1,6 +1,6 @@
 # Dataset analysis — sdss-raw
 
-- Source path: `/home/alexmrtr/Pucpr/a-look-outside/dataset/raw/sdss.h5`
+- Source path: `/home/alexmrtr/a-look-outside/dataset/raw/sdss.h5`
 - Sample count: **21785**
 - Number of classes: **10**
 - Image shape (H, W, C): [69, 69, 3]

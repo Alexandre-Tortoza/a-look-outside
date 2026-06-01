@@ -1,6 +1,6 @@
 {
   "summary": {
-    "source_path": "/home/alexmrtr/Pucpr/a-look-outside/dataset/raw/decals.h5",
+    "source_path": "/home/alexmrtr/a-look-outside/dataset/raw/decals.h5",
     "sample_count": 17736,
     "num_classes": 10,
     "image_shape": [
@@ -53,7 +53,7 @@
   "class_statistics": [
     {
       "class_index": 0,
-      "class_name": "class_0",
+      "class_name": "disturbed",
       "count": 1081,
       "percentage": 6.0949,
       "mean_red": 0.16068987548351288,
@@ -66,7 +66,7 @@
     },
     {
       "class_index": 1,
-      "class_name": "class_1",
+      "class_name": "merging",
       "count": 1853,
       "percentage": 10.4477,
       "mean_red": 0.17667965590953827,
@@ -79,7 +79,7 @@
     },
     {
       "class_index": 2,
-      "class_name": "class_2",
+      "class_name": "round_smooth",
       "count": 2645,
       "percentage": 14.9132,
       "mean_red": 0.16481372714042664,
@@ -92,7 +92,7 @@
     },
     {
       "class_index": 3,
-      "class_name": "class_3",
+      "class_name": "in_between_round_smooth",
       "count": 2027,
       "percentage": 11.4287,
       "mean_red": 0.15761375427246094,
@@ -105,7 +105,7 @@
     },
     {
       "class_index": 4,
-      "class_name": "class_4",
+      "class_name": "cigar_shaped_smooth",
       "count": 334,
       "percentage": 1.8832,
       "mean_red": 0.1522800773382187,
@@ -118,7 +118,7 @@
     },
     {
       "class_index": 5,
-      "class_name": "class_5",
+      "class_name": "barred_spiral",
       "count": 2043,
       "percentage": 11.5189,
       "mean_red": 0.17539919912815094,
@@ -131,7 +131,7 @@
     },
     {
       "class_index": 6,
-      "class_name": "class_6",
+      "class_name": "unbarred_tight_spiral",
       "count": 1829,
       "percentage": 10.3124,
       "mean_red": 0.17823509871959686,
@@ -144,7 +144,7 @@
     },
     {
       "class_index": 7,
-      "class_name": "class_7",
+      "class_name": "unbarred_loose_spiral",
       "count": 2628,
       "percentage": 14.8173,
       "mean_red": 0.16454586386680603,
@@ -157,7 +157,7 @@
     },
     {
       "class_index": 8,
-      "class_name": "class_8",
+      "class_name": "edge_on_no_bulge",
       "count": 1423,
       "percentage": 8.0232,
       "mean_red": 0.16908295452594757,
@@ -170,7 +170,7 @@
     },
     {
       "class_index": 9,
-      "class_name": "class_9",
+      "class_name": "edge_on_with_bulge",
       "count": 1873,
       "percentage": 10.5604,
       "mean_red": 0.16318656504154205,

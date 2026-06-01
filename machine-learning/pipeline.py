@@ -95,18 +95,20 @@ def run_pipeline(
             dataset_name, raw_directory, processed_directory
         )
         images, labels = read_dataset(dataset_path)
-        splits = build_data_loaders(
-            images=images,
-            labels=labels,
-            image_size=image_size,
-            batch_size=batch_size,
-            num_workers=num_workers,
-            random_seed=random_seed,
-            pin_memory=pin_memory,
-            split_ratios=configuration.get("split_ratios"),
-        )
-
         for model_spec in model_specs:
+            splits = build_data_loaders(
+                images=images,
+                labels=labels,
+                image_size=image_size,
+                batch_size=batch_size,
+                num_workers=num_workers,
+                random_seed=random_seed,
+                pin_memory=pin_memory,
+                split_ratios=configuration.get("split_ratios"),
+                training_balance_config=configuration.get("training_balance"),
+                dataset_name=dataset_name,
+                model_name=model_spec.name,
+            )
             run_result = _run_single(
                 model_spec=model_spec,
                 dataset_name=dataset_name,
@@ -156,6 +158,12 @@ def _run_single(
 ) -> RunResult:
     info = get_model_info(model_spec.name)
     factory_kwargs = _merge_factory_kwargs(configuration, model_spec)
+
+    if configuration.get("training", {}).get("resume_from_checkpoint", False):
+        checkpoint = _find_latest_checkpoint(runs_root, model_spec.name, dataset_name)
+        if checkpoint is not None:
+            factory_kwargs = {**factory_kwargs, "initial_checkpoint": str(checkpoint)}
+
     run_directory = create_run_directory(runs_root, model_spec.name, dataset_name)
     logger = setup_run_logger(run_directory, name=f"{model_spec.name}.{dataset_name}")
     logger.info("run directory: %s", run_directory)
@@ -254,6 +262,7 @@ def _run_single(
 
     metrics_payload = {
         **aggregate_metrics,
+        "balance_metadata": splits.balance_metadata,
         "confusion_matrix": error_analysis.confusion_matrix,
         "confusion_matrix_normalized": error_analysis.confusion_matrix_normalized,
         "per_class_accuracy": error_analysis.per_class_accuracy,
@@ -339,6 +348,7 @@ def _run_single(
         history_early_stopped=history.early_stopped,
         total_test_samples=int(len(evaluation.targets)),
         manifest=manifest,
+        balance_metadata=splits.balance_metadata,
     )
     append_run_to_jsonl(jsonl_path, record)
     logger.info(
@@ -372,3 +382,23 @@ def _merge_factory_kwargs(
         if key != "fine_tuning"
     }
     return {**config_kwargs, **model_spec.factory_kwargs}
+
+
+def _find_latest_checkpoint(
+    runs_root: Path,
+    model_name: str,
+    dataset_name: str,
+) -> Path | None:
+    if not runs_root.exists():
+        return None
+    prefix = f"{model_name}-{dataset_name}-"
+    candidates: list[tuple[float, Path]] = []
+    for run_dir in runs_root.iterdir():
+        if not run_dir.is_dir() or not run_dir.name.startswith(prefix):
+            continue
+        for pth_file in run_dir.glob("*.pth"):
+            candidates.append((pth_file.stat().st_mtime, pth_file))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda pair: pair[0], reverse=True)
+    return candidates[0][1]

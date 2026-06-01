@@ -58,12 +58,34 @@ def _per_run_rules(
 ) -> list[Insight]:
     insights: list[Insight] = []
     for record in records:
+        insights.extend(_rule_processed_evaluation(record))
         insights.extend(_rule_imbalance_dominance(record))
         insights.extend(_rule_overconfident(record))
         insights.extend(_rule_low_kappa_high_acc(record))
         insights.extend(_rule_threshold_issue(record))
         insights.extend(_rule_per_class_failure(record, runs_root))
     return insights
+
+
+def _rule_processed_evaluation(record: dict[str, Any]) -> list[Insight]:
+    dataset_name = str(record.get("dataset_name") or "")
+    if _dataset_name_is_robust(dataset_name):
+        return []
+    return [Insight(
+        severity="info",
+        scope="run",
+        title=f"{record['model_name']} on {dataset_name}: processed evaluation dataset",
+        detail=(
+            "This run evaluates on a pre-balanced or augmented dataset. Treat it as "
+            "a comparison run, not as the primary robust estimate."
+        ),
+        suggested_action=(
+            "Use leaderboard_robust.md for primary model selection, and keep this "
+            "run for ablation/comparison only."
+        ),
+        affected_runs=[record.get("run_directory_name", "")],
+        metadata={"evaluation_dataset_kind": "processed"},
+    )]
 
 
 def _cross_run_rules(
@@ -507,6 +529,16 @@ def _safe_float(value: Any) -> float | None:
     if result != result:  # NaN
         return None
     return result
+
+
+def _dataset_name_is_robust(dataset_name: str) -> bool:
+    processed_markers = (
+        "_smote",
+        "_random_over_sampling",
+        "_random_under_sampling",
+        "_augmentation_",
+    )
+    return not any(marker in dataset_name for marker in processed_markers)
 
 
 def _write_markdown(

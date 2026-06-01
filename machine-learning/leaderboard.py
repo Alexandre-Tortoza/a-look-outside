@@ -33,6 +33,8 @@ LEADERBOARD_DISPLAY_COLUMNS = (
     "rank",
     "model_name",
     "dataset_name",
+    "evaluation_dataset_kind",
+    "robust_evaluation",
     "accuracy",
     "balanced_accuracy",
     "macro_f1",
@@ -75,6 +77,25 @@ def regenerate_all(
     )
     write_leaderboard_csv(leaderboard_frame, leaderboard_csv_path)
 
+    robust_records = [
+        record for record in records
+        if _record_is_robust_evaluation(record)
+    ]
+    robust_best_records = select_best_per_pair(robust_records, primary_metric)
+    robust_frame = build_leaderboard(
+        robust_best_records,
+        primary_metric,
+        secondary_metric,
+    )
+    write_leaderboard_markdown(
+        frame=robust_frame,
+        output_path=docs_root / "leaderboard_robust.md",
+        all_records=robust_records,
+        primary_metric=primary_metric,
+        secondary_metric=secondary_metric,
+    )
+    write_leaderboard_csv(robust_frame, docs_root / "leaderboard_robust.csv")
+
     metrics_to_plot = list(heatmap_metrics or DEFAULT_HEATMAP_METRICS)
     for metric_name in metrics_to_plot:
         plot_metric_heatmap(
@@ -103,13 +124,42 @@ def load_records(jsonl_path: Path) -> list[dict[str, Any]]:
             if not stripped:
                 continue
             try:
-                records.append(json.loads(stripped))
+                record = json.loads(stripped)
+                _normalize_evaluation_kind(record)
+                records.append(record)
             except json.JSONDecodeError as error:
                 logger.warning(
                     "skipping malformed line %d in %s: %s",
                     line_number, jsonl_path, error,
                 )
     return records
+
+
+def _normalize_evaluation_kind(record: dict[str, Any]) -> None:
+    if "robust_evaluation" not in record:
+        record["robust_evaluation"] = _dataset_name_is_robust(
+            str(record.get("dataset_name") or "")
+        )
+    if "evaluation_dataset_kind" not in record:
+        record["evaluation_dataset_kind"] = (
+            "natural" if record["robust_evaluation"] else "processed"
+        )
+
+
+def _record_is_robust_evaluation(record: dict[str, Any]) -> bool:
+    if "robust_evaluation" in record:
+        return bool(record["robust_evaluation"])
+    return _dataset_name_is_robust(str(record.get("dataset_name") or ""))
+
+
+def _dataset_name_is_robust(dataset_name: str) -> bool:
+    processed_markers = (
+        "_smote",
+        "_random_over_sampling",
+        "_random_under_sampling",
+        "_augmentation_",
+    )
+    return not any(marker in dataset_name for marker in processed_markers)
 
 
 def select_best_per_pair(
@@ -327,7 +377,13 @@ def _render_top_table(frame: pd.DataFrame) -> str:
     columns = [column for column in LEADERBOARD_DISPLAY_COLUMNS if column in frame.columns]
     rendered = frame[columns].copy()
     for column in rendered.columns:
-        if column in {"model_name", "dataset_name", "documentation_directory"}:
+        if column in {
+            "model_name",
+            "dataset_name",
+            "documentation_directory",
+            "evaluation_dataset_kind",
+            "robust_evaluation",
+        }:
             continue
         if column == "rank":
             continue

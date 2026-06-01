@@ -26,6 +26,32 @@ from torch.utils.data import DataLoader
 from models._base import EvaluationResult, TrainingHistory
 
 
+class FocalLoss(nn.Module):
+    def __init__(
+        self,
+        weight: torch.Tensor | None = None,
+        gamma: float = 2.0,
+        label_smoothing: float = 0.0,
+    ) -> None:
+        super().__init__()
+        self.weight = weight
+        self.gamma = gamma
+        self.label_smoothing = label_smoothing
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        cross_entropy = nn.functional.cross_entropy(
+            logits,
+            targets,
+            weight=self.weight,
+            reduction="none",
+            label_smoothing=self.label_smoothing,
+        )
+        probabilities = torch.softmax(logits.float(), dim=1)
+        target_probabilities = probabilities.gather(1, targets[:, None]).squeeze(1)
+        focal_weight = (1.0 - target_probabilities).pow(self.gamma)
+        return (focal_weight * cross_entropy).mean()
+
+
 class DeepLearningAdapter(ABC):
     is_deep_learning = True
 
@@ -33,6 +59,7 @@ class DeepLearningAdapter(ABC):
         self._model: nn.Module | None = None
         self._device: torch.device | None = None
         self._best_state_dict: dict[str, Any] | None = None
+        self._initial_checkpoint: Path | None = None
 
     @property
     @abstractmethod
@@ -65,6 +92,11 @@ class DeepLearningAdapter(ABC):
 
         model = self.build_model(splits.num_classes, splits.image_size).to(device)
         self._model = model
+
+        if self._initial_checkpoint is not None:
+            payload = torch.load(self._initial_checkpoint, map_location=device, weights_only=True)
+            model.load_state_dict(payload["state_dict"])
+            logger.info("loaded initial checkpoint from %s", self._initial_checkpoint)
 
         criterion = self.build_criterion(
             splits=splits,
@@ -140,7 +172,26 @@ class DeepLearningAdapter(ABC):
         configuration: dict[str, Any],
         device: torch.device,
     ) -> nn.Module:
-        return nn.CrossEntropyLoss()
+        training = configuration.get("training") or {}
+        class_weights = _class_weights(
+            splits=splits,
+            class_weighting=str(training.get("class_weighting", "none")),
+            device=device,
+        )
+        label_smoothing = float(training.get("label_smoothing", 0.0))
+        loss_name = str(training.get("loss", "cross_entropy"))
+        if loss_name == "cross_entropy":
+            return nn.CrossEntropyLoss(
+                weight=class_weights,
+                label_smoothing=label_smoothing,
+            )
+        if loss_name == "focal":
+            return FocalLoss(
+                weight=class_weights,
+                gamma=float(training.get("focal_gamma", 2.0)),
+                label_smoothing=label_smoothing,
+            )
+        raise ValueError("training.loss must be one of: cross_entropy, focal")
 
     def build_optimizer(
         self,
@@ -261,3 +312,28 @@ class DeepLearningAdapter(ABC):
         if total == 0:
             return 0.0, 0.0
         return loss_sum / total, correct / total
+
+
+def _class_weights(
+    *,
+    splits: DatasetSplits,
+    class_weighting: str,
+    device: torch.device,
+) -> torch.Tensor | None:
+    if class_weighting == "none":
+        return None
+    counts = torch.bincount(
+        torch.as_tensor(splits.train_labels, dtype=torch.long),
+        minlength=splits.num_classes,
+    ).float()
+    counts = counts.clamp_min(1.0)
+    if class_weighting == "inverse_frequency":
+        weights = counts.sum() / counts
+    elif class_weighting == "sqrt_inverse_frequency":
+        weights = torch.sqrt(counts.sum() / counts)
+    else:
+        raise ValueError(
+            "training.class_weighting must be one of: "
+            "none, inverse_frequency, sqrt_inverse_frequency"
+        )
+    return (weights / weights.mean()).to(device)

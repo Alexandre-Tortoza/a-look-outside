@@ -1,6 +1,6 @@
 {
   "summary": {
-    "source_path": "/home/alexmrtr/Pucpr/a-look-outside/dataset/raw/sdss.h5",
+    "source_path": "/home/alexmrtr/a-look-outside/dataset/raw/sdss.h5",
     "sample_count": 21785,
     "num_classes": 10,
     "image_shape": [
@@ -53,7 +53,7 @@
   "class_statistics": [
     {
       "class_index": 0,
-      "class_name": "class_0",
+      "class_name": "disk_face_on_no_spiral",
       "count": 3461,
       "percentage": 15.8871,
       "mean_red": 0.09776366502046585,
@@ -66,7 +66,7 @@
     },
     {
       "class_index": 1,
-      "class_name": "class_1",
+      "class_name": "smooth_completely_round",
       "count": 6997,
       "percentage": 32.1184,
       "mean_red": 0.11569095402956009,
@@ -79,7 +79,7 @@
     },
     {
       "class_index": 2,
-      "class_name": "class_2",
+      "class_name": "smooth_in_between_round",
       "count": 6292,
       "percentage": 28.8823,
       "mean_red": 0.12253020703792572,
@@ -92,7 +92,7 @@
     },
     {
       "class_index": 3,
-      "class_name": "class_3",
+      "class_name": "smooth_cigar_shaped",
       "count": 349,
       "percentage": 1.602,
       "mean_red": 0.0938490703701973,
@@ -105,7 +105,7 @@
     },
     {
       "class_index": 4,
-      "class_name": "class_4",
+      "class_name": "disk_edge_on_rounded_bulge",
       "count": 1534,
       "percentage": 7.0415,
       "mean_red": 0.09230083227157593,
@@ -118,7 +118,7 @@
     },
     {
       "class_index": 5,
-      "class_name": "class_5",
+      "class_name": "disk_edge_on_boxy_bulge",
       "count": 17,
       "percentage": 0.078,
       "mean_red": 0.07902118563652039,
@@ -131,7 +131,7 @@
     },
     {
       "class_index": 6,
-      "class_name": "class_6",
+      "class_name": "disk_edge_on_no_bulge",
       "count": 589,
       "percentage": 2.7037,
       "mean_red": 0.053791970014572144,
@@ -144,7 +144,7 @@
     },
     {
       "class_index": 7,
-      "class_name": "class_7",
+      "class_name": "disk_face_on_tight_spiral",
       "count": 1121,
       "percentage": 5.1457,
       "mean_red": 0.1000925749540329,
@@ -157,7 +157,7 @@
     },
     {
       "class_index": 8,
-      "class_name": "class_8",
+      "class_name": "disk_face_on_medium_spiral",
       "count": 906,
       "percentage": 4.1588,
       "mean_red": 0.09134165197610855,
@@ -170,7 +170,7 @@
     },
     {
       "class_index": 9,
-      "class_name": "class_9",
+      "class_name": "disk_face_on_loose_spiral",
       "count": 519,
       "percentage": 2.3824,
       "mean_red": 0.08752872794866562,

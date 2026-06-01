@@ -242,6 +242,7 @@ def _run_cross_dataset_dino(
         train_data = _load_dataset(
             train_name,
             mapping.source_to_common,
+            len(mapping.common_class_names),
             config,
             computer_configuration,
             raw_directory,
@@ -250,6 +251,7 @@ def _run_cross_dataset_dino(
         eval_data = _load_dataset(
             eval_name,
             mapping.target_to_common,
+            len(mapping.common_class_names),
             config,
             computer_configuration,
             raw_directory,
@@ -333,6 +335,7 @@ def _run_federated_dino(
         _load_dataset(
             datasets[0],
             mapping.source_to_common,
+            len(mapping.common_class_names),
             config,
             computer_configuration,
             raw_directory,
@@ -341,6 +344,7 @@ def _run_federated_dino(
         _load_dataset(
             datasets[1],
             mapping.target_to_common,
+            len(mapping.common_class_names),
             config,
             computer_configuration,
             raw_directory,
@@ -500,6 +504,7 @@ def _run_federated_dino(
 def _load_dataset(
     dataset_name: str,
     label_mapping: dict[int, int],
+    num_classes: int,
     config: dict[str, Any],
     computer_configuration: dict[str, Any],
     raw_directory: Path,
@@ -519,7 +524,16 @@ def _load_dataset(
         random_seed=int(training.get("random_seed", config.get("random_seed", 42))),
         pin_memory=device.type == "cuda",
         split_ratios=config.get("split_ratios"),
+        training_balance_config=config.get("training_balance"),
+        dataset_name=dataset_name,
+        model_name="dino",
     )
+    if splits.num_classes > num_classes:
+        raise ValueError(
+            f"mapped labels for {dataset_name!r} require {splits.num_classes} "
+            f"classes, but the common label space has {num_classes}"
+        )
+    splits.num_classes = num_classes
     return LoadedDataset(name=dataset_name, path=dataset_path, splits=splits)
 
 
@@ -681,6 +695,7 @@ def _persist_evaluation(
     )
     metrics_payload = {
         **aggregate_metrics,
+        "balance_metadata": splits.balance_metadata,
         "confusion_matrix": error_analysis.confusion_matrix,
         "confusion_matrix_normalized": error_analysis.confusion_matrix_normalized,
         "per_class_accuracy": error_analysis.per_class_accuracy,
@@ -722,6 +737,7 @@ def _persist_evaluation(
             history_early_stopped=history.early_stopped,
             total_test_samples=int(len(evaluation.targets)),
             manifest=manifest,
+            balance_metadata=splits.balance_metadata,
         ),
     )
     logger.info(

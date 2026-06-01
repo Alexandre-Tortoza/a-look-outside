@@ -269,7 +269,10 @@ def _plot_confusion_matrix(
     inputs: RunDocumentationInputs,
     class_labels: list[str],
 ) -> None:
-    matrix = inputs.evaluation.confusion_matrix
+    if inputs.error_analysis is not None:
+        matrix = inputs.error_analysis.confusion_matrix
+    else:
+        matrix = inputs.evaluation.confusion_matrix
     figure_size = (max(6, len(class_labels) * 0.7), max(5, len(class_labels) * 0.6))
     figure, axis = plt.subplots(figsize=figure_size)
     sns.heatmap(
