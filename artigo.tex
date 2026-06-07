@@ -1,0 +1,240 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[hyphens]{url}
+\usepackage[colorlinks=true,allcolors=black]{hyperref}
+
+\newcommand\red[1]{{\textcolor{red}{#1}}}
+
+\title{Classificação Morfológica de Galáxias com Avaliação Robusta em SDSS e DECals}
+
+\author{
+\IEEEauthorblockA{Experiência Criativa: Projeto Transformador I\\
+Bacharelado em Ciência da Computação -- PUCPR
+\\[3ex]
+Turma \red{X} -- Equipe \red{N} \\
+\red{Nome1 Sobrenome1}, \red{Nome2 Sobrenome2}, \red{Nome3 Sobrenome3}, \red{Nome4 Sobrenome4} \\
+{\tt\small \{\red{email1}, \red{email2}, \red{email3}, \red{email4}\}@pucpr.edu.br}
+}
+}
+
+\date{today}
+
+\sloppy
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este trabalho avalia modelos de aprendizado profundo para classificação morfológica de galáxias em imagens dos conjuntos SDSS e DECals. Foram comparadas arquiteturas centralizadas, incluindo DINO, EfficientNet e ResNet50, além de um cenário com Federated DINO. A análise considera dados naturais, versões balanceadas por SMOTE e \textit{random oversampling}, e experimentos de transferência entre domínios. Os resultados mostram que métricas baseadas apenas em acurácia podem superestimar o desempenho em bases desbalanceadas, especialmente em SDSS. Em avaliação natural, o melhor resultado foi obtido pelo Federated DINO no cenário \textit{client DECals raw on DECals raw}, com \textit{balanced accuracy} de 0,8299. Entretanto, os experimentos cruzados SDSS--DECals apresentaram desempenho substancialmente inferior, indicando que a generalização entre domínios continua sendo uma limitação relevante.
+\end{abstract}
+
+\begin{IEEEkeywords}
+classificação de galáxias, aprendizado profundo, DINO, aprendizado federado, desbalanceamento de classes, avaliação robusta.
+\end{IEEEkeywords}
+
+\section{Introdução}
+\label{sec:introduction}
+
+A classificação morfológica de galáxias é uma etapa importante para a análise de grandes levantamentos astronômicos. Com o crescimento do volume de imagens coletadas por diferentes instrumentos, métodos automáticos baseados em aprendizado de máquina tornam-se necessários para reduzir o custo de inspeção manual e permitir análises em larga escala.
+
+Apesar do avanço de redes neurais convolucionais e modelos visuais pré-treinados, a classificação de galáxias permanece desafiadora por três razões principais. Primeiro, os conjuntos de dados são frequentemente desbalanceados, com algumas classes muito mais frequentes que outras. Segundo, imagens provenientes de diferentes levantamentos podem apresentar mudanças de domínio associadas a resolução, instrumentação, profundidade e distribuição visual. Terceiro, métricas agregadas como acurácia podem ocultar falhas em classes minoritárias.
+
+Este trabalho investiga esses pontos por meio de uma avaliação comparativa em SDSS e DECals. Foram avaliados DINO, EfficientNet, ResNet50 e Federated DINO em cenários naturais, processados e cruzados. O objetivo não é apenas identificar o maior valor de acurácia, mas compreender quais modelos generalizam melhor sob diferentes condições de balanceamento e domínio.
+
+As principais contribuições deste estudo são:
+
+\begin{itemize}
+    \item comparação de modelos centralizados e federados para classificação morfológica de galáxias;
+    \item análise do impacto de SMOTE e \textit{random oversampling} em datasets desbalanceados;
+    \item avaliação separada entre resultados naturais e resultados obtidos em dados processados;
+    \item estudo de transferência entre SDSS e DECals;
+    \item discussão de classes problemáticas, confusões sistemáticas e limitações de reprodutibilidade.
+\end{itemize}
+
+\section{Trabalhos Relacionados}
+\label{sec:related_work}
+
+A classificação morfológica automática de galáxias tem sido abordada principalmente com técnicas de visão computacional e aprendizado profundo. Redes convolucionais são uma escolha natural para esse problema por extraírem padrões locais, como bordas, braços espirais, núcleos e assimetrias estruturais. Arquiteturas como ResNet e EfficientNet são frequentemente usadas como baselines por combinarem bom desempenho com treinamento relativamente estável.
+
+Modelos baseados em aprendizado auto-supervisionado, como DINO, oferecem uma alternativa promissora por explorarem representações visuais aprendidas a partir de grandes volumes de imagens. Esse tipo de representação pode ser útil em astronomia, onde dados rotulados são caros e a separação entre classes pode envolver detalhes visuais sutis.
+
+Outro eixo relevante é o aprendizado federado. Em cenários nos quais dados astronômicos estão distribuídos entre instituições ou levantamentos, modelos federados permitem treinar componentes locais sem centralizar diretamente todas as amostras. Entretanto, a federação não elimina automaticamente o problema de mudança de domínio: clientes com distribuições visuais distintas ainda podem produzir modelos com desempenho assimétrico.
+
+Este trabalho se posiciona nesse contexto ao comparar modelos centralizados e federados, separando explicitamente avaliações naturais de avaliações em bases processadas. Essa separação é importante porque datasets balanceados artificialmente podem indicar potencial de aprendizado, mas não necessariamente refletem o comportamento em dados reais.
+
+\section{Metodologia}
+\label{sec:method}
+
+\subsection{Datasets}
+
+Foram utilizados dois conjuntos de imagens de galáxias em formato H5: SDSS e DECals. Ambos contêm imagens RGB e rótulos inteiros para 10 classes morfológicas.
+
+O dataset SDSS raw possui 21.785 amostras, imagens de 69$\times$69 pixels e razão de desbalanceamento de 411,59 entre a classe majoritária e a minoritária. A classe minoritária possui apenas 17 amostras, enquanto a majoritária possui 6.997. Esse desbalanceamento torna a acurácia simples uma métrica insuficiente para avaliar o desempenho real por classe.
+
+O dataset DECals raw possui 17.736 amostras, imagens de 256$\times$256 pixels e razão de desbalanceamento de 7,92. Embora ainda exista desbalanceamento, ele é muito menor que em SDSS, permitindo uma comparação mais estável entre modelos.
+
+\begin{table}[!htb]
+    \centering
+    \caption{Resumo dos datasets naturais avaliados.}
+    \label{tab:datasets}
+    \vspace{-1.5mm}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Dataset} & \textbf{Amostras} & \textbf{Classes} & \textbf{Imagem} & \textbf{Razão} \\
+        \midrule
+        SDSS raw & 21.785 & 10 & 69$\times$69 & 411,59 \\
+        DECals raw & 17.736 & 10 & 256$\times$256 & 7,92 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.47\linewidth]{\detokenize{docs/dataset/sdss-raw/sample_mosaic.png}}
+    \hfill
+    \includegraphics[width=0.47\linewidth]{\detokenize{docs/dataset/decals-raw/sample_mosaic.png}}
+    \vspace{-2mm}
+    \caption{Amostras visuais dos datasets SDSS raw (esquerda) e DECals raw (direita).}
+    \label{fig:dataset_samples}
+\end{figure}
+
+\subsection{Modelos e cenários}
+
+Foram avaliados quatro grupos de modelos: DINO, EfficientNet, ResNet50 e Federated DINO. Os três primeiros representam modelos centralizados treinados e avaliados em diferentes versões dos datasets. O Federated DINO representa o cenário federado, incluindo avaliações locais e globais em SDSS e DECals.
+
+Os cenários experimentais foram agrupados em três categorias:
+
+\begin{itemize}
+    \item \textbf{Avaliação natural}: treino e teste em dados raw ou cenários federados avaliados em dados naturais.
+    \item \textbf{Avaliação processada}: uso de datasets balanceados por SMOTE ou \textit{random oversampling}.
+    \item \textbf{Avaliação cruzada}: treino em um domínio e avaliação em outro, como SDSS $\rightarrow$ DECals e DECals $\rightarrow$ SDSS.
+\end{itemize}
+
+\subsection{Métricas}
+
+A métrica principal adotada foi \textit{balanced accuracy}, pois ela reduz o efeito de classes majoritárias em datasets desbalanceados. A acurácia foi mantida como métrica secundária. Também foram analisadas \textit{macro F1}, coeficiente kappa de Cohen, coeficiente de correlação de Matthews, ROC AUC macro, \textit{log loss} e número absoluto de amostras classificadas incorretamente.
+
+\section{Resultados e Discussão}
+\label{sec:results}
+
+Foram registradas 36 execuções no total, cobrindo 21 pares únicos de modelo e dataset no leaderboard geral. Para a análise principal, foram considerados 14 pares naturais do leaderboard robusto. A Tabela~\ref{tab:robust_results} apresenta os resultados ordenados por \textit{balanced accuracy}.
+
+\begin{table*}[!htb]
+    \centering
+    \caption{Resultados principais em avaliação natural, ordenados por \textit{balanced accuracy}.}
+    \label{tab:robust_results}
+    \vspace{-1.5mm}
+    \scriptsize
+    \begin{tabular}{rlrrrrrr}
+        \toprule
+        \textbf{Rank} & \textbf{Modelo/cenário} & \textbf{Acc.} & \textbf{B. Acc.} & \textbf{Macro F1} & \textbf{Kappa} & \textbf{Log loss} & \textbf{Erros} \\
+        \midrule
+        1 & FedDINO / client DECals$\rightarrow$DECals & 0,8213 & 0,8299 & 0,6953 & 0,7881 & 0,7632 & 342 \\
+        2 & FedDINO / global SDSS & 0,8476 & 0,8146 & 0,8026 & 0,8021 & 0,4718 & 498 \\
+        3 & DINO / DECals raw & 0,8129 & 0,8049 & 0,7958 & 0,7887 & 0,7301 & 498 \\
+        4 & FedDINO / client SDSS$\rightarrow$SDSS & 0,8387 & 0,7872 & 0,7876 & 0,7900 & 0,5042 & 527 \\
+        5 & ResNet50 / DECals raw & 0,8023 & 0,7827 & 0,7800 & 0,7771 & 0,6444 & 526 \\
+        6 & EfficientNet / DECals raw & 0,7971 & 0,7810 & 0,7763 & 0,7706 & 0,6284 & 540 \\
+        7 & EfficientNet / SDSS raw & 0,8341 & 0,6985 & 0,6912 & 0,7863 & 0,4874 & 542 \\
+        8 & ResNet50 / SDSS raw & 0,8427 & 0,6895 & 0,6941 & 0,7959 & 0,5393 & 514 \\
+        9 & DINO / SDSS raw & 0,8421 & 0,6829 & 0,6834 & 0,7957 & 0,6076 & 516 \\
+        10 & FedDINO / global DECals & 0,6458 & 0,6243 & 0,5410 & 0,5844 & 1,0597 & 678 \\
+        11 & FedDINO / client DECals$\rightarrow$SDSS & 0,5685 & 0,5383 & 0,4679 & 0,4645 & 1,4319 & 1410 \\
+        12 & DINO / SDSS$\rightarrow$DECals & 0,5308 & 0,4983 & 0,4352 & 0,4468 & 1,5839 & 898 \\
+        13 & FedDINO / client SDSS$\rightarrow$DECals & 0,5470 & 0,4837 & 0,4445 & 0,4634 & 1,4915 & 867 \\
+        14 & DINO / DECals$\rightarrow$SDSS & 0,4755 & 0,4377 & 0,3756 & 0,3040 & 2,0288 & 1714 \\
+        \bottomrule
+    \end{tabular}
+\end{table*}
+
+\subsection{Resultados em dados naturais}
+
+O melhor resultado natural foi obtido pelo Federated DINO em \textit{client DECals raw on DECals raw}, com \textit{balanced accuracy} de 0,8299. O segundo melhor resultado foi o Federated DINO em \textit{global on SDSS raw}, com 0,8146. Entre os modelos centralizados, o DINO obteve o melhor desempenho em DECals raw, com 0,8049.
+
+Em SDSS raw, EfficientNet obteve a maior \textit{balanced accuracy}, com 0,6985, seguido por ResNet50 com 0,6895 e DINO com 0,6829. As diferenças entre os três modelos são pequenas, sugerindo que a limitação principal nesse cenário está associada ao desbalanceamento e não apenas à arquitetura.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\linewidth]{\detokenize{docs/leaderboard_balanced_accuracy.png}}
+    \vspace{-2mm}
+    \caption{Comparação geral dos resultados por \textit{balanced accuracy}.}
+    \label{fig:leaderboard_balanced_accuracy}
+\end{figure}
+
+\subsection{Impacto do balanceamento artificial}
+
+Os datasets processados apresentaram resultados muito superiores, especialmente em SDSS. A Tabela~\ref{tab:processed_results} mostra os principais resultados com SMOTE e \textit{random oversampling}. O maior valor geral foi obtido por DINO em SDSS com \textit{random oversampling}, com \textit{balanced accuracy} de 0,9764.
+
+\begin{table}[!htb]
+    \centering
+    \caption{Resultados em datasets processados.}
+    \label{tab:processed_results}
+    \vspace{-1.5mm}
+    \scriptsize
+    \begin{tabular}{llrr}
+        \toprule
+        \textbf{Modelo} & \textbf{Dataset} & \textbf{B. Acc.} & \textbf{Macro F1} \\
+        \midrule
+        DINO & SDSS ROS & 0,9764 & 0,9763 \\
+        EfficientNet & SDSS SMOTE & 0,9721 & 0,9720 \\
+        ResNet50 & SDSS SMOTE & 0,9710 & 0,9708 \\
+        DINO & SDSS SMOTE & 0,9643 & 0,9640 \\
+        DINO & DECals SMOTE & 0,8760 & 0,8759 \\
+        ResNet50 & DECals SMOTE & 0,8666 & 0,8655 \\
+        EfficientNet & DECals SMOTE & 0,8560 & 0,8544 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Esses resultados indicam que o balanceamento tem forte impacto no desempenho observado. Entretanto, eles não devem ser interpretados como medida direta de desempenho em dados reais, pois a distribuição de validação e teste processada não representa necessariamente a distribuição natural de uso. Assim, os resultados processados são úteis para demonstrar potencial de aprendizado e sensibilidade ao desbalanceamento, enquanto os resultados naturais são mais adequados para discutir generalização.
+
+\subsection{Desbalanceamento em SDSS}
+
+O SDSS raw apresenta diferença expressiva entre acurácia e \textit{balanced accuracy}. EfficientNet, por exemplo, obteve acurácia de 0,8341, mas \textit{balanced accuracy} de 0,6985. ResNet50 obteve acurácia de 0,8427 e \textit{balanced accuracy} de 0,6895. DINO obteve acurácia de 0,8421 e \textit{balanced accuracy} de 0,6829.
+
+Essa diferença mostra que a acurácia simples favorece classes majoritárias. As recomendações automáticas geradas nos artefatos do projeto também apontam que a classe 5 em SDSS raw não foi recuperada em várias execuções, com valores de recall e acurácia por classe iguais a zero. Portanto, a avaliação macro é essencial para evitar conclusões otimistas.
+
+\subsection{DECals e estabilidade entre modelos}
+
+Em DECals raw, os modelos centralizados apresentaram desempenho mais próximo. DINO alcançou \textit{balanced accuracy} de 0,8049, ResNet50 alcançou 0,7827 e EfficientNet alcançou 0,7810. A diferença existe, mas não é grande o suficiente para afirmar superioridade definitiva sem múltiplas sementes ou intervalos de confiança.
+
+O menor desbalanceamento de DECals ajuda a explicar a maior estabilidade das métricas. Ainda assim, as confusões sistemáticas apontadas nos relatórios sugerem que algumas classes compartilham características morfológicas ambíguas, o que pode limitar o desempenho independentemente da arquitetura.
+
+\subsection{Aprendizado federado e mudança de domínio}
+
+O Federated DINO mostrou desempenho competitivo em avaliações intra-domínio. O cenário local DECals$\rightarrow$DECals obteve o melhor resultado natural, enquanto o cenário global SDSS também ficou entre os melhores. Entretanto, o desempenho caiu em DECals global e nos cenários cruzados.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\linewidth]{\detokenize{docs/by_model/federated_dino/comparison.png}}
+    \vspace{-2mm}
+    \caption{Comparação dos cenários avaliados com Federated DINO.}
+    \label{fig:federated_dino}
+\end{figure}
+
+Os resultados de transferência cruzada foram os mais baixos do estudo. O DINO treinado em SDSS e avaliado em DECals obteve \textit{balanced accuracy} de 0,4983. No sentido inverso, DECals$\rightarrow$SDSS, o resultado foi 0,4377. Esses valores indicam que bom desempenho intra-dataset não garante generalização entre levantamentos. Estratégias explícitas de adaptação de domínio, normalização ou treinamento multi-domínio podem ser necessárias.
+
+\subsection{Limitações}
+
+Algumas combinações de modelo e dataset possuem apenas uma execução, o que impede estimar variância estatística. Além disso, várias runs foram registradas com o repositório em estado \textit{dirty}, o que deve ser considerado ao discutir reprodutibilidade exata. Também há métricas ausentes em parte dos cenários federados ou cruzados, como ROC AUC macro. Por fim, resultados em datasets processados não devem ser comparados diretamente com resultados naturais sem explicitar a diferença de protocolo.
+
+\section{Conclusões}
+\label{sec:conclusions}
+
+Este trabalho avaliou modelos centralizados e federados para classificação morfológica de galáxias em SDSS e DECals. Os resultados mostram que o balanceamento artificial pode elevar substancialmente as métricas, especialmente em SDSS, mas que a avaliação natural continua sendo a mais adequada para discutir generalização.
+
+Em dados naturais, Federated DINO obteve os melhores resultados nos cenários intra-domínio, enquanto DINO, ResNet50 e EfficientNet apresentaram desempenho competitivo em DECals raw. Em SDSS raw, a grande diferença entre acurácia e \textit{balanced accuracy} evidenciou o impacto do desbalanceamento extremo, reforçando a necessidade de métricas macro.
+
+A transferência entre SDSS e DECals foi o ponto mais fraco da avaliação. Mesmo modelos com bom desempenho local apresentaram queda acentuada em cenários cruzados, indicando que a mudança de domínio é uma limitação central para aplicações práticas.
+
+Como trabalhos futuros, recomenda-se repetir os principais experimentos com múltiplas sementes, aplicar técnicas como \textit{focal loss} ou perda ponderada por classe, investigar oversampling apenas no conjunto de treino e aprofundar a análise visual das classes sistematicamente confundidas com métodos de explicabilidade.
+
+\end{document}
