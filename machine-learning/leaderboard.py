@@ -226,7 +226,7 @@ def write_leaderboard_markdown(
 ) -> Path:
     intended_use = _resolve_leaderboard_intended_use(output_path)
     sections: list[str] = [
-        f"# Leaderboard — atualizado {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}\n",
+        f"# Leaderboard — atualizado {datetime.now(UTC).strftime('%Y-%m-%d %H:%M %Z')}\n",
         f"- Primary metric: **{primary_metric}**",
         f"- Secondary metric: **{secondary_metric}**",
         f"- Intended use: **{intended_use}**",
@@ -583,6 +583,7 @@ def _plot_comparison_bar(
 
 
 def _resolve_leaderboard_intended_use(output_path: Path) -> str:
+    """Return interpretation label for leaderboard outputs by filename."""
     if output_path.name == "leaderboard_robust.md":
         return "primary evidence (natural evaluation only)"
     if output_path.name == "leaderboard.md":

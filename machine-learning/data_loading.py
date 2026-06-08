@@ -321,6 +321,7 @@ def _class_distribution(labels: np.ndarray) -> dict[int, int]:
 
 
 def _infer_dataset_kind(dataset_name: str | None) -> str:
+    """Infer dataset kind from naming conventions used in this repository."""
     if not dataset_name:
         return DATASET_KIND_UNKNOWN
     if dataset_name_is_processed(dataset_name):
