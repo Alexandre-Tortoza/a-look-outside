@@ -323,10 +323,10 @@ def _class_distribution(labels: np.ndarray) -> dict[int, int]:
 def _infer_dataset_kind(dataset_name: str | None) -> str:
     if not dataset_name:
         return DATASET_KIND_UNKNOWN
-    if dataset_name.endswith("_raw"):
-        return DATASET_KIND_NATURAL
     if dataset_name_is_processed(dataset_name):
         return DATASET_KIND_PROCESSED
+    if dataset_name.endswith("_raw"):
+        return DATASET_KIND_NATURAL
     return DATASET_KIND_UNKNOWN
 
 

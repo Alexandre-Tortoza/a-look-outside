@@ -17,4 +17,5 @@ def dataset_name_is_processed(dataset_name: str) -> bool:
 
 
 def normalize_dataset_path(dataset_path: str | None) -> str:
+    """Normalize separators and lowercase for stable path-kind checks."""
     return (dataset_path or "").replace("\\", "/").lower()

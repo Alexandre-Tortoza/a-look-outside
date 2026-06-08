@@ -142,10 +142,15 @@ def load_records(jsonl_path: Path) -> list[dict[str, Any]]:
 def _normalize_evaluation_kind(record: dict[str, Any]) -> None:
     inferred_robust = _record_is_robust_evaluation(record)
     existing_robust = record.get("robust_evaluation")
-    if existing_robust is None:
-        record["robust_evaluation"] = inferred_robust
-    else:
-        record["robust_evaluation"] = bool(existing_robust) and inferred_robust
+    if existing_robust is not None and bool(existing_robust) != inferred_robust:
+        logger.info(
+            "normalizing robust_evaluation for model=%s dataset=%s from %s to %s",
+            record.get("model_name"),
+            record.get("dataset_name"),
+            bool(existing_robust),
+            inferred_robust,
+        )
+    record["robust_evaluation"] = inferred_robust
     record["evaluation_dataset_kind"] = (
         "natural" if record["robust_evaluation"] else "processed"
     )
