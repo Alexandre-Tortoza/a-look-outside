@@ -144,9 +144,10 @@ def _normalize_evaluation_kind(record: dict[str, Any]) -> None:
     existing_robust = record.get("robust_evaluation")
     if existing_robust is not None and bool(existing_robust) != inferred_robust:
         logger.info(
-            "normalizing robust_evaluation for model=%s dataset=%s from %s to %s",
+            "normalizing robust_evaluation for model=%s dataset=%s from %s (bool=%s) to %s",
             record.get("model_name"),
             record.get("dataset_name"),
+            existing_robust,
             bool(existing_robust),
             inferred_robust,
         )
@@ -226,7 +227,7 @@ def write_leaderboard_markdown(
 ) -> Path:
     intended_use = _resolve_leaderboard_intended_use(output_path)
     sections: list[str] = [
-        f"# Leaderboard — atualizado {datetime.now(UTC).strftime('%Y-%m-%d %H:%M %Z')}\n",
+        f"# Leaderboard — atualizado {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}\n",
         f"- Primary metric: **{primary_metric}**",
         f"- Secondary metric: **{secondary_metric}**",
         f"- Intended use: **{intended_use}**",
