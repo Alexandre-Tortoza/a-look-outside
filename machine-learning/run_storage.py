@@ -111,7 +111,10 @@ def build_runs_jsonl_record(
     balance_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     top_k = aggregate_metrics.get("top_k_accuracy") or {}
-    robust_evaluation = _is_robust_evaluation_dataset(dataset_name)
+    robust_evaluation = _is_robust_evaluation_dataset(
+        dataset_name=dataset_name,
+        dataset_path=manifest.dataset_path,
+    )
     return {
         "run_directory_name": run_directory.name,
         "run_directory_path": str(run_directory),
@@ -156,14 +159,22 @@ def build_runs_jsonl_record(
     }
 
 
-def _is_robust_evaluation_dataset(dataset_name: str) -> bool:
+def _is_robust_evaluation_dataset(
+    dataset_name: str,
+    dataset_path: str | None = None,
+) -> bool:
     processed_markers = (
         "_smote",
         "_random_over_sampling",
         "_random_under_sampling",
         "_augmentation_",
     )
-    return not any(marker in dataset_name for marker in processed_markers)
+    if any(marker in dataset_name for marker in processed_markers):
+        return False
+    normalized_path = (dataset_path or "").replace("\\", "/").lower()
+    if "/dataset/processed/" in normalized_path:
+        return False
+    return True
 
 
 def dump_predictions_csv(

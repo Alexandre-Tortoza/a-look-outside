@@ -241,6 +241,7 @@ def _apply_train_only_balance(
         "applied": False,
         "methods": [],
         "apply_to": "none",
+        "dataset_kind_inferred": _infer_dataset_kind(dataset_name),
         "train_distribution_before": _class_distribution(split.train_labels),
         "train_distribution_after": _class_distribution(split.train_labels),
         "validation_distribution": _class_distribution(split.val_labels),
@@ -311,6 +312,22 @@ def _class_distribution(labels: np.ndarray) -> dict[int, int]:
         int(label): int(count)
         for label, count in zip(unique_labels, counts, strict=True)
     }
+
+
+def _infer_dataset_kind(dataset_name: str | None) -> str:
+    if not dataset_name:
+        return "unknown"
+    if dataset_name.endswith("_raw"):
+        return "natural"
+    processed_markers = (
+        "_smote",
+        "_random_over_sampling",
+        "_random_under_sampling",
+        "_augmentation_",
+    )
+    if any(marker in dataset_name for marker in processed_markers):
+        return "processed"
+    return "unknown"
 
 
 def flatten_normalized(images: np.ndarray) -> np.ndarray:

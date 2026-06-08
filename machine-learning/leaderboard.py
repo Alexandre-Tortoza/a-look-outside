@@ -136,20 +136,28 @@ def load_records(jsonl_path: Path) -> list[dict[str, Any]]:
 
 
 def _normalize_evaluation_kind(record: dict[str, Any]) -> None:
-    if "robust_evaluation" not in record:
-        record["robust_evaluation"] = _dataset_name_is_robust(
-            str(record.get("dataset_name") or "")
-        )
-    if "evaluation_dataset_kind" not in record:
-        record["evaluation_dataset_kind"] = (
-            "natural" if record["robust_evaluation"] else "processed"
-        )
+    record["robust_evaluation"] = _record_is_robust_evaluation(record)
+    record["evaluation_dataset_kind"] = (
+        "natural" if record["robust_evaluation"] else "processed"
+    )
 
 
 def _record_is_robust_evaluation(record: dict[str, Any]) -> bool:
-    if "robust_evaluation" in record:
-        return bool(record["robust_evaluation"])
-    return _dataset_name_is_robust(str(record.get("dataset_name") or ""))
+    dataset_name = str(record.get("dataset_name") or "")
+    if not _dataset_name_is_robust(dataset_name):
+        return False
+
+    dataset_path = str(record.get("dataset_path") or "")
+    normalized_path = dataset_path.replace("\\", "/").lower()
+    if "/dataset/processed/" in normalized_path:
+        return False
+
+    training_balance = record.get("training_balance") or {}
+    dataset_kind_inferred = str(training_balance.get("dataset_kind_inferred") or "")
+    if dataset_kind_inferred == "processed":
+        return False
+
+    return True
 
 
 def _dataset_name_is_robust(dataset_name: str) -> bool:
@@ -208,10 +216,12 @@ def write_leaderboard_markdown(
     primary_metric: str,
     secondary_metric: str,
 ) -> Path:
+    intended_use = _resolve_leaderboard_intended_use(output_path)
     sections: list[str] = [
         f"# Leaderboard — atualizado {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}\n",
         f"- Primary metric: **{primary_metric}**",
         f"- Secondary metric: **{secondary_metric}**",
+        f"- Intended use: **{intended_use}**",
         f"- Total runs registered: **{len(all_records)}**",
         f"- Unique (model, dataset) pairs: **{len(frame)}**",
         "",
@@ -562,3 +572,11 @@ def _plot_comparison_bar(
     figure.tight_layout()
     figure.savefig(output_path, dpi=150)
     plt.close(figure)
+
+
+def _resolve_leaderboard_intended_use(output_path: Path) -> str:
+    if output_path.name == "leaderboard_robust.md":
+        return "primary evidence (natural evaluation only)"
+    if output_path.name == "leaderboard.md":
+        return "secondary analysis (includes processed/ablation datasets)"
+    return "analysis"

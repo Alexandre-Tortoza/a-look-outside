@@ -153,6 +153,14 @@ Comando principal:
 python machine-learning/main.py
 ```
 
+### Protocolo experimental (valido vs ablacao)
+
+- Protocolo principal (evidencia cientifica): usar datasets `*_raw`, fazer split estratificado train/validation/test e aplicar balanceamento somente no treino (`training_balance.apply_to: train_only`).
+- Protocolo auxiliar (ablacao): usar datasets processados (`*_smote`, `*_random_over_sampling`, etc.) apenas para medir impacto de balanceamento artificial.
+- Validacao e teste devem permanecer naturais no protocolo principal.
+- `docs/leaderboard_robust.md` e a fonte oficial para conclusoes de generalizacao.
+- `docs/leaderboard.md` deve ser tratado como analise secundaria (inclui cenarios processados/ablacao).
+
 Modelos iniciais:
 
 - `dino`
