@@ -11,7 +11,10 @@ from typing import Any
 import numpy as np
 import yaml
 from data_loading import DatasetSplits  # type: ignore[import-not-found]
-from dataset_kind import dataset_name_is_processed  # type: ignore[import-not-found]
+from dataset_kind import (  # type: ignore[import-not-found]
+    dataset_name_is_processed,
+    normalize_dataset_path,
+)
 from manifest import RunManifest  # type: ignore[import-not-found]
 from metric_computation import (  # type: ignore[import-not-found]
     ErrorAnalysis,
@@ -166,7 +169,7 @@ def _is_robust_evaluation_dataset(
 ) -> bool:
     if dataset_name_is_processed(dataset_name):
         return False
-    normalized_path = (dataset_path or "").replace("\\", "/").lower()
+    normalized_path = normalize_dataset_path(dataset_path)
     if "/dataset/processed/" in normalized_path:
         return False
     return True

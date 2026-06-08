@@ -6,7 +6,12 @@ from typing import Any
 
 import numpy as np
 import torch
-from dataset_kind import dataset_name_is_processed
+from dataset_kind import (
+    DATASET_KIND_NATURAL,
+    DATASET_KIND_PROCESSED,
+    DATASET_KIND_UNKNOWN,
+    dataset_name_is_processed,
+)
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
@@ -317,12 +322,12 @@ def _class_distribution(labels: np.ndarray) -> dict[int, int]:
 
 def _infer_dataset_kind(dataset_name: str | None) -> str:
     if not dataset_name:
-        return "unknown"
+        return DATASET_KIND_UNKNOWN
     if dataset_name.endswith("_raw"):
-        return "natural"
+        return DATASET_KIND_NATURAL
     if dataset_name_is_processed(dataset_name):
-        return "processed"
-    return "unknown"
+        return DATASET_KIND_PROCESSED
+    return DATASET_KIND_UNKNOWN
 
 
 def flatten_normalized(images: np.ndarray) -> np.ndarray:

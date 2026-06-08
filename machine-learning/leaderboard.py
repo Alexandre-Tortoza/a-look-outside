@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +13,10 @@ matplotlib.use("Agg")  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
 import seaborn as sns  # noqa: E402
-from dataset_kind import dataset_name_is_processed  # type: ignore[import-not-found]  # noqa: E402
+from dataset_kind import (  # type: ignore[import-not-found]  # noqa: E402
+    dataset_name_is_processed,
+    normalize_dataset_path,
+)
 from text_formatting import format_metric  # type: ignore[import-not-found]  # noqa: E402
 
 logger = logging.getLogger("leaderboard")
@@ -154,7 +157,7 @@ def _record_is_robust_evaluation(record: dict[str, Any]) -> bool:
         return False
 
     dataset_path = str(record.get("dataset_path") or "")
-    normalized_path = dataset_path.replace("\\", "/").lower()
+    normalized_path = normalize_dataset_path(dataset_path)
     if "/dataset/processed/" in normalized_path:
         return False
 
@@ -218,7 +221,7 @@ def write_leaderboard_markdown(
 ) -> Path:
     intended_use = _resolve_leaderboard_intended_use(output_path)
     sections: list[str] = [
-        f"# Leaderboard — atualizado {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}\n",
+        f"# Leaderboard — atualizado {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}\n",
         f"- Primary metric: **{primary_metric}**",
         f"- Secondary metric: **{secondary_metric}**",
         f"- Intended use: **{intended_use}**",
