@@ -13,6 +13,7 @@ matplotlib.use("Agg")  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
 import seaborn as sns  # noqa: E402
+from dataset_kind import dataset_name_is_processed  # type: ignore[import-not-found]  # noqa: E402
 from text_formatting import format_metric  # type: ignore[import-not-found]  # noqa: E402
 
 logger = logging.getLogger("leaderboard")
@@ -136,7 +137,12 @@ def load_records(jsonl_path: Path) -> list[dict[str, Any]]:
 
 
 def _normalize_evaluation_kind(record: dict[str, Any]) -> None:
-    record["robust_evaluation"] = _record_is_robust_evaluation(record)
+    inferred_robust = _record_is_robust_evaluation(record)
+    existing_robust = record.get("robust_evaluation")
+    if existing_robust is None:
+        record["robust_evaluation"] = inferred_robust
+    else:
+        record["robust_evaluation"] = bool(existing_robust) and inferred_robust
     record["evaluation_dataset_kind"] = (
         "natural" if record["robust_evaluation"] else "processed"
     )
@@ -161,13 +167,7 @@ def _record_is_robust_evaluation(record: dict[str, Any]) -> bool:
 
 
 def _dataset_name_is_robust(dataset_name: str) -> bool:
-    processed_markers = (
-        "_smote",
-        "_random_over_sampling",
-        "_random_under_sampling",
-        "_augmentation_",
-    )
-    return not any(marker in dataset_name for marker in processed_markers)
+    return not dataset_name_is_processed(dataset_name)
 
 
 def select_best_per_pair(

@@ -6,6 +6,7 @@ from typing import Any
 
 import numpy as np
 import torch
+from dataset_kind import dataset_name_is_processed
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
@@ -319,13 +320,7 @@ def _infer_dataset_kind(dataset_name: str | None) -> str:
         return "unknown"
     if dataset_name.endswith("_raw"):
         return "natural"
-    processed_markers = (
-        "_smote",
-        "_random_over_sampling",
-        "_random_under_sampling",
-        "_augmentation_",
-    )
-    if any(marker in dataset_name for marker in processed_markers):
+    if dataset_name_is_processed(dataset_name):
         return "processed"
     return "unknown"
 

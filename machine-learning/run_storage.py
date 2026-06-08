@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 import yaml
 from data_loading import DatasetSplits  # type: ignore[import-not-found]
+from dataset_kind import dataset_name_is_processed  # type: ignore[import-not-found]
 from manifest import RunManifest  # type: ignore[import-not-found]
 from metric_computation import (  # type: ignore[import-not-found]
     ErrorAnalysis,
@@ -163,13 +164,7 @@ def _is_robust_evaluation_dataset(
     dataset_name: str,
     dataset_path: str | None = None,
 ) -> bool:
-    processed_markers = (
-        "_smote",
-        "_random_over_sampling",
-        "_random_under_sampling",
-        "_augmentation_",
-    )
-    if any(marker in dataset_name for marker in processed_markers):
+    if dataset_name_is_processed(dataset_name):
         return False
     normalized_path = (dataset_path or "").replace("\\", "/").lower()
     if "/dataset/processed/" in normalized_path:
