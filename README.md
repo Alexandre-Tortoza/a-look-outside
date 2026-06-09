@@ -197,16 +197,87 @@ uv run python xai/main.py
 
 ### `docs/` — Resultados e Documentação
 
-| Caminho | Conteúdo |
-|---|---|
-| `docs/leaderboard.md` | Leaderboard completo — ranking de todos os 36 runs por balanced accuracy, com tabelas por modelo e por dataset |
-| `docs/leaderboard.csv` | Leaderboard em formato CSV para análise tabular |
-| `docs/leaderboard_*.png` | Heatmaps de métricas: accuracy, balanced accuracy, macro F1, Cohen's Kappa, MCC, ROC-AUC, log loss |
-| `docs/runs.jsonl` | Registro estruturado de todas as runs — fonte primária do leaderboard |
-| `docs/by_dataset/<dataset>/` | Relatórios por dataset: métricas, matrizes de confusão, curvas de aprendizado, distribuição de classes |
-| `docs/by_model/<model>/` | Relatórios por modelo: sumário, métricas e relatório de classificação |
-| `docs/models/<model>/<run>/` | Artefatos detalhados de cada run: `summary.md`, `metrics.md`, `classification_report.md`, `confusion_matrix.png`, `learning_curves.png`, `class_distribution.png` |
-| `docs/dataset/<dataset>/` | Análise exploratória dos datasets: amostras por classe, histogramas de intensidade |
+Todos os artefatos de documentação são gerados automaticamente pelos módulos `machine-learning/` e `dataset/` e organizados em quatro subárvores:
+
+#### Leaderboard e Registro de Runs
+
+| Artefato | Caminho | Conteúdo |
+|---|---|---|
+| Leaderboard Markdown | [`docs/leaderboard.md`](docs/leaderboard.md) | Ranking completo de todos os 36 runs por balanced accuracy, com tabelas por modelo e por dataset |
+| Leaderboard CSV | [`docs/leaderboard.csv`](docs/leaderboard.csv) | Mesmo ranking em formato tabular para análise externa |
+| Registro de runs | [`docs/runs.jsonl`](docs/runs.jsonl) | Fonte primária — uma linha JSON por run, consumida pelo leaderboard |
+| Heatmap balanced accuracy | [`docs/leaderboard_balanced_accuracy.png`](docs/leaderboard_balanced_accuracy.png) | Visão geral de todos os pares (modelo × dataset) |
+| Heatmaps de outras métricas | `docs/leaderboard_<metric>.png` | accuracy · macro\_f1 · cohen\_kappa · roc\_auc\_macro · mcc · log\_loss |
+
+#### Comparações por Dataset
+
+Cada dataset possui um relatório comparativo entre todos os modelos avaliados nele.
+
+| Dataset | Relatório | Gráfico |
+|---|---|---|
+| sdss\_raw | [`docs/by_dataset/sdss_raw/comparison.md`](docs/by_dataset/sdss_raw/comparison.md) | [`comparison.png`](docs/by_dataset/sdss_raw/comparison.png) |
+| decals\_raw | [`docs/by_dataset/decals_raw/comparison.md`](docs/by_dataset/decals_raw/comparison.md) | [`comparison.png`](docs/by_dataset/decals_raw/comparison.png) |
+| sdss\_smote | [`docs/by_dataset/sdss_smote/comparison.md`](docs/by_dataset/sdss_smote/comparison.md) | [`comparison.png`](docs/by_dataset/sdss_smote/comparison.png) |
+| sdss\_random\_over\_sampling | [`docs/by_dataset/sdss_random_over_sampling/comparison.md`](docs/by_dataset/sdss_random_over_sampling/comparison.md) | [`comparison.png`](docs/by_dataset/sdss_random_over_sampling/comparison.png) |
+
+#### Comparações por Modelo
+
+Cada modelo possui um relatório comparativo entre todos os datasets em que foi avaliado.
+
+| Modelo | Relatório | Gráfico |
+|---|---|---|
+| DINOv2 | [`docs/by_model/dino/comparison.md`](docs/by_model/dino/comparison.md) | [`comparison.png`](docs/by_model/dino/comparison.png) |
+
+#### Análise Exploratória dos Datasets
+
+Gerada por `dataset/analysis.py`. Cada dataset possui sua própria subpasta em `docs/dataset/<dataset>/`:
+
+| Artefato | Arquivo | Conteúdo |
+|---|---|---|
+| Sumário estatístico | `summary.md` | Contagem de amostras, balanceamento, shape |
+| Verificação de valores | `value_check.md` | Checagens de integridade (NaN, faixa de pixel, duplicatas) |
+| Estatísticas por classe | `class_statistics.csv` | Contagem e proporção de cada classe |
+| Distribuição de classes | `class_distribution.png` | Barras de frequência por classe |
+| Balanço de classes | `class_balance.png` | Razão entre maior e menor classe |
+| Histograma de intensidade | `pixel_intensity_histogram.png` | Distribuição de valores de pixel |
+| Mosaico de amostras | `sample_mosaic.png` | Grade de exemplos por classe |
+
+Datasets disponíveis: `sdss-raw/` · `decals-raw/` · `sdss_smote/` · `sdss_random_over_sampling/`
+
+#### Artefatos Detalhados por Run
+
+Gerados por `machine-learning/documentation_storage.py`. Estrutura de pastas:
+
+```
+docs/models/<model>/<run-id>/
+```
+
+Cada run contém:
+
+| Artefato | Arquivo | Conteúdo |
+|---|---|---|
+| Sumário | `summary.md` | Configuração, dataset, métricas finais, duração |
+| Métricas | `metrics.md` | Accuracy · balanced acc. · F1 · Kappa · MCC · ROC-AUC · log loss |
+| Relatório de classificação | `classification_report.md` | Precision, recall e F1 por classe |
+| Análise de erros | `error_analysis.md` | Classes mais confundidas e padrões de erro |
+| Curvas de aprendizado | `learning_curves.png` | Loss e accuracy por época (treino e validação) |
+| Matriz de confusão | `confusion_matrix.png` / `confusion_matrix_normalized.png` | Absoluta e normalizada por linha |
+| Curvas ROC | `roc_curves.png` | Uma curva por classe (OvR) |
+| Curvas Precision-Recall | `precision_recall_curves.png` | Uma curva por classe |
+| Acurácia por classe | `per_class_accuracy.png` | Barras de acurácia individual por classe |
+| Gráfico de calibração | `calibration_plot.png` | Confiança prevista vs. acurácia real |
+| Distribuição de classes | `class_distribution.png` | Split treino/val/teste por classe |
+
+Runs versionados atualmente em `docs/models/`:
+
+| Run | Modelo | Dataset |
+|---|---|---|
+| `dino-sdss_raw-10-05-2026-sdss_raw` | DINOv2 | sdss\_raw |
+| `dino-decals_raw-10-05-2026-decals_raw` | DINOv2 | decals\_raw |
+| `dino-sdss_smote-10-05-2026-sdss_smote` | DINOv2 | sdss\_smote |
+| `dino-sdss_random_over_sampling-10-05-2026-2-sdss_random_over_sampling` | DINOv2 | sdss\_random\_over\_sampling |
+
+> Os demais runs (EfficientNet, ResNet50, KNN, federado) estão registrados em `docs/runs.jsonl` e no leaderboard, mas seus artefatos de imagem/relatório não estão versionados — consultar `machine-learning/runs/` na pasta de entrega.
 
 #### Exemplo — DINOv2 + SDSS random over-sampling (melhor run, balanced accuracy 97,64%)
 
