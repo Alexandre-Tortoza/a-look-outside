@@ -14,6 +14,14 @@ Tese sugerida para o artigo:
 - O Federated DINO e competitivo em cenarios intra-dominio, mas a transferencia SDSS <-> DECals ainda e fraca.
 - Balanced accuracy, macro F1, kappa e log loss devem ser priorizadas em relacao a acuracia simples.
 
+### Protocolo experimental adotado
+
+- Protocolo principal (valido): datasets `*_raw`, split estratificado train/validation/test e balanceamento apenas no treino.
+- Protocolo auxiliar (ablacao): datasets processados (`smote`, `random_over_sampling`, etc.) usados somente para medir impacto do balanceamento artificial.
+- No protocolo principal, validacao e teste permanecem naturais; portanto, os resultados robustos nao usam dados processados na avaliacao.
+- `docs/leaderboard_robust.md` e a referencia oficial para conclusoes cientificas.
+- `docs/leaderboard.md` deve ser citado como evidencia secundaria/ablacao, nao como base principal de generalizacao.
+
 ## 2. Fontes consolidadas
 
 Arquivos principais:

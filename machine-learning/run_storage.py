@@ -11,6 +11,10 @@ from typing import Any
 import numpy as np
 import yaml
 from data_loading import DatasetSplits  # type: ignore[import-not-found]
+from dataset_kind import (  # type: ignore[import-not-found]
+    dataset_name_is_processed,
+    normalize_dataset_path,
+)
 from manifest import RunManifest  # type: ignore[import-not-found]
 from metric_computation import (  # type: ignore[import-not-found]
     ErrorAnalysis,
@@ -111,7 +115,10 @@ def build_runs_jsonl_record(
     balance_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     top_k = aggregate_metrics.get("top_k_accuracy") or {}
-    robust_evaluation = _is_robust_evaluation_dataset(dataset_name)
+    robust_evaluation = _is_robust_evaluation_dataset(
+        dataset_name=dataset_name,
+        dataset_path=manifest.dataset_path,
+    )
     return {
         "run_directory_name": run_directory.name,
         "run_directory_path": str(run_directory),
@@ -156,14 +163,16 @@ def build_runs_jsonl_record(
     }
 
 
-def _is_robust_evaluation_dataset(dataset_name: str) -> bool:
-    processed_markers = (
-        "_smote",
-        "_random_over_sampling",
-        "_random_under_sampling",
-        "_augmentation_",
-    )
-    return not any(marker in dataset_name for marker in processed_markers)
+def _is_robust_evaluation_dataset(
+    dataset_name: str,
+    dataset_path: str | None = None,
+) -> bool:
+    if dataset_name_is_processed(dataset_name):
+        return False
+    normalized_path = normalize_dataset_path(dataset_path)
+    if "/dataset/processed/" in normalized_path:
+        return False
+    return True
 
 
 def dump_predictions_csv(

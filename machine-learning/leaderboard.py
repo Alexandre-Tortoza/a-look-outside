@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +13,10 @@ matplotlib.use("Agg")  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
 import seaborn as sns  # noqa: E402
+from dataset_kind import (  # type: ignore[import-not-found]  # noqa: E402
+    dataset_name_is_processed,
+    normalize_dataset_path,
+)
 from text_formatting import format_metric  # type: ignore[import-not-found]  # noqa: E402
 
 logger = logging.getLogger("leaderboard")
@@ -136,30 +140,43 @@ def load_records(jsonl_path: Path) -> list[dict[str, Any]]:
 
 
 def _normalize_evaluation_kind(record: dict[str, Any]) -> None:
-    if "robust_evaluation" not in record:
-        record["robust_evaluation"] = _dataset_name_is_robust(
-            str(record.get("dataset_name") or "")
+    inferred_robust = _record_is_robust_evaluation(record)
+    existing_robust = record.get("robust_evaluation")
+    if existing_robust is not None and bool(existing_robust) != inferred_robust:
+        logger.info(
+            "normalizing robust_evaluation for model=%s dataset=%s from %s (bool=%s) to %s",
+            record.get("model_name"),
+            record.get("dataset_name"),
+            existing_robust,
+            bool(existing_robust),
+            inferred_robust,
         )
-    if "evaluation_dataset_kind" not in record:
-        record["evaluation_dataset_kind"] = (
-            "natural" if record["robust_evaluation"] else "processed"
-        )
+    record["robust_evaluation"] = inferred_robust
+    record["evaluation_dataset_kind"] = (
+        "natural" if record["robust_evaluation"] else "processed"
+    )
 
 
 def _record_is_robust_evaluation(record: dict[str, Any]) -> bool:
-    if "robust_evaluation" in record:
-        return bool(record["robust_evaluation"])
-    return _dataset_name_is_robust(str(record.get("dataset_name") or ""))
+    dataset_name = str(record.get("dataset_name") or "")
+    if not _dataset_name_is_robust(dataset_name):
+        return False
+
+    dataset_path = str(record.get("dataset_path") or "")
+    normalized_path = normalize_dataset_path(dataset_path)
+    if "/dataset/processed/" in normalized_path:
+        return False
+
+    training_balance = record.get("training_balance") or {}
+    dataset_kind_inferred = str(training_balance.get("dataset_kind_inferred") or "")
+    if dataset_kind_inferred == "processed":
+        return False
+
+    return True
 
 
 def _dataset_name_is_robust(dataset_name: str) -> bool:
-    processed_markers = (
-        "_smote",
-        "_random_over_sampling",
-        "_random_under_sampling",
-        "_augmentation_",
-    )
-    return not any(marker in dataset_name for marker in processed_markers)
+    return not dataset_name_is_processed(dataset_name)
 
 
 def select_best_per_pair(
@@ -208,10 +225,12 @@ def write_leaderboard_markdown(
     primary_metric: str,
     secondary_metric: str,
 ) -> Path:
+    intended_use = _resolve_leaderboard_intended_use(output_path)
     sections: list[str] = [
-        f"# Leaderboard — atualizado {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}\n",
+        f"# Leaderboard — atualizado {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}\n",
         f"- Primary metric: **{primary_metric}**",
         f"- Secondary metric: **{secondary_metric}**",
+        f"- Intended use: **{intended_use}**",
         f"- Total runs registered: **{len(all_records)}**",
         f"- Unique (model, dataset) pairs: **{len(frame)}**",
         "",
@@ -562,3 +581,12 @@ def _plot_comparison_bar(
     figure.tight_layout()
     figure.savefig(output_path, dpi=150)
     plt.close(figure)
+
+
+def _resolve_leaderboard_intended_use(output_path: Path) -> str:
+    """Return interpretation label for leaderboard outputs by filename."""
+    if output_path.name == "leaderboard_robust.md":
+        return "primary evidence (natural evaluation only)"
+    if output_path.name == "leaderboard.md":
+        return "secondary analysis (includes processed/ablation datasets)"
+    return "analysis"

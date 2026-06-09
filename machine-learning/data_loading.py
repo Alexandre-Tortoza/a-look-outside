@@ -6,6 +6,12 @@ from typing import Any
 
 import numpy as np
 import torch
+from dataset_kind import (
+    DATASET_KIND_NATURAL,
+    DATASET_KIND_PROCESSED,
+    DATASET_KIND_UNKNOWN,
+    dataset_name_is_processed,
+)
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
@@ -241,6 +247,7 @@ def _apply_train_only_balance(
         "applied": False,
         "methods": [],
         "apply_to": "none",
+        "dataset_kind_inferred": _infer_dataset_kind(dataset_name),
         "train_distribution_before": _class_distribution(split.train_labels),
         "train_distribution_after": _class_distribution(split.train_labels),
         "validation_distribution": _class_distribution(split.val_labels),
@@ -311,6 +318,17 @@ def _class_distribution(labels: np.ndarray) -> dict[int, int]:
         int(label): int(count)
         for label, count in zip(unique_labels, counts, strict=True)
     }
+
+
+def _infer_dataset_kind(dataset_name: str | None) -> str:
+    """Infer dataset kind from naming conventions used in this repository."""
+    if not dataset_name:
+        return DATASET_KIND_UNKNOWN
+    if dataset_name_is_processed(dataset_name):
+        return DATASET_KIND_PROCESSED
+    if dataset_name.endswith("_raw"):
+        return DATASET_KIND_NATURAL
+    return DATASET_KIND_UNKNOWN
 
 
 def flatten_normalized(images: np.ndarray) -> np.ndarray:

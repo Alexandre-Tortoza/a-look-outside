@@ -100,7 +100,9 @@ dataset_analysis:
 
 benchmarks:
   robust_full:
-    description: "Robust baseline — raw SDSS/DECaLS com balanceamento apenas no treino"
+    description: "Protocolo principal (valido) — raw SDSS/DECaLS com split estratificado e balanceamento apenas no treino"
+    protocol: primary_natural
+    evidence_role: primary
     datasets:
       sources: [sdss, decals]
       include_raw: true
@@ -111,7 +113,9 @@ benchmarks:
     generate_recommendations: true
 
   galaxy_full:
-    description: "Legacy comparison — 3 modelos x 2 datasets x raw+smote"
+    description: "Protocolo auxiliar (ablacao) — comparacao com datasets processados (raw+smote)"
+    protocol: ablation_processed
+    evidence_role: ablation
     datasets:
       sources: [sdss, decals]
       include_raw: true

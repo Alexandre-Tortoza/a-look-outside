@@ -138,6 +138,10 @@ def _print_plan(
     summary_table = Table(title=f"Plano de execucao — {benchmark_name}")
     summary_table.add_column("Item", style="cyan")
     summary_table.add_column("Valor")
+    if benchmark_spec.get("protocol"):
+        summary_table.add_row("Protocol", str(benchmark_spec.get("protocol")))
+    if benchmark_spec.get("evidence_role"):
+        summary_table.add_row("Evidence role", str(benchmark_spec.get("evidence_role")))
     summary_table.add_row("Sources", ", ".join(sources) or "—")
     summary_table.add_row("Include raw", "yes" if include_raw else "no")
     summary_table.add_row(
