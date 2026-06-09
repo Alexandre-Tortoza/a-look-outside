@@ -1,5 +1,12 @@
 # A Look Outside
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.5+-EE4C2C?logo=pytorch&logoColor=white)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+![Runs](https://img.shields.io/badge/runs-36-informational)
+![Balanced Acc Robusto](https://img.shields.io/badge/balanced_acc_(protocolo_robusto)-84,27%25-brightgreen)
+![Balanced Acc Ablação](https://img.shields.io/badge/balanced_acc_(ablação_pós--patch)-97,21%25-yellow)
+
 Classificação morfológica de galáxias com aprendizado profundo, balanceamento de dados, aprendizado federado e explicabilidade visual (XAI).
 
 ---
@@ -12,7 +19,7 @@ Classificação morfológica de galáxias com aprendizado profundo, balanceament
 | **Surveys** | SDSS · DECaLS |
 | **Modelos avaliados** | DINOv2 · EfficientNet · ResNet50 · KNN · DINOv2 Federado |
 | **Total de runs** | 36 runs · 21 pares (modelo, dataset) únicos |
-| **Melhor resultado** | DINOv2 + SDSS (random over-sampling) — balanced accuracy **97,64%** |
+| **Melhor resultado** | DINOv2 + SDSS (random over-sampling) — balanced accuracy **97,64%** [^leak] |
 | **XAI** | Grad-CAM · Exemplos de vizinhos mais próximos |
 | **Aprendizado federado** | FedAvg com clientes SDSS e DECaLS |
 
@@ -41,13 +48,15 @@ Classificação morfológica de galáxias com aprendizado profundo, balanceament
 
 | Rank | Modelo | Dataset | Balanced Acc. | Macro F1 | ROC-AUC |
 |---|---|---|---|---|---|
-| 1 | DINOv2 | sdss_random_over_sampling | **97,64%** | 0,9763 | 0,9985 |
+| 1 | DINOv2 | sdss_random_over_sampling | **97,64%** [^leak] | 0,9763 | 0,9985 |
 | 2 | EfficientNet | sdss_smote | 97,21% | 0,9720 | 0,9987 |
 | 3 | ResNet50 | sdss_smote | 97,10% | 0,9708 | 0,9985 |
 | 4 | DINOv2 | sdss_smote | 96,43% | 0,9640 | 0,9935 |
 | 5 | DINOv2 | decals_smote | 87,60% | 0,8759 | 0,9820 |
 
 ![DINOv2 — balanced accuracy por dataset](docs/by_model/dino/comparison.png)
+
+[^leak]: Run executada antes do patch de 26/05/2026 (commit `1bb9897d`) — o balanceamento foi aplicado ao dataset completo **antes** da divisão treino/validação/teste, vazando informação de validação e teste para o treino. Os valores inflacionados são um limite superior artificial; as runs pós-patch (commit `6d2339f3`, a partir de 26/05/2026) são a evidência válida.
 
 ### Cross-Dataset e Aprendizado Federado
 
@@ -270,12 +279,12 @@ Cada run contém:
 
 Runs versionados atualmente em `docs/models/`:
 
-| Run | Modelo | Dataset |
-|---|---|---|
-| `dino-sdss_raw-10-05-2026-sdss_raw` | DINOv2 | sdss\_raw |
-| `dino-decals_raw-10-05-2026-decals_raw` | DINOv2 | decals\_raw |
-| `dino-sdss_smote-10-05-2026-sdss_smote` | DINOv2 | sdss\_smote |
-| `dino-sdss_random_over_sampling-10-05-2026-2-sdss_random_over_sampling` | DINOv2 | sdss\_random\_over\_sampling |
+| Run | Modelo | Dataset | Validade |
+|---|---|---|---|
+| `dino-sdss_raw-10-05-2026-sdss_raw` | DINOv2 | sdss\_raw | ⚠ pré-patch [^leak] |
+| `dino-decals_raw-10-05-2026-decals_raw` | DINOv2 | decals\_raw | ⚠ pré-patch [^leak] |
+| `dino-sdss_smote-10-05-2026-sdss_smote` | DINOv2 | sdss\_smote | ⚠ pré-patch [^leak] |
+| `dino-sdss_random_over_sampling-10-05-2026-2-sdss_random_over_sampling` | DINOv2 | sdss\_random\_over\_sampling | ⚠ pré-patch [^leak] |
 
 > Os demais runs (EfficientNet, ResNet50, KNN, federado) estão registrados em `docs/runs.jsonl` e no leaderboard, mas seus artefatos de imagem/relatório não estão versionados — consultar `machine-learning/runs/` na pasta de entrega.
 
