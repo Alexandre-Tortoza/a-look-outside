@@ -1,383 +1,329 @@
 # A Look Outside
 
-Projeto para classificacao morfologica de galaxias usando datasets em formato H5, tecnicas de balanceamento, pipelines de machine learning e geracao de artefatos de explicabilidade.
+Classificação morfológica de galáxias com aprendizado profundo, balanceamento de dados, aprendizado federado e explicabilidade visual (XAI).
 
-## Visao Geral
+---
 
-O projeto sera organizado em quatro areas principais:
+## Visão Geral
 
-- `dataset/`: leitura dos datasets originais e geracao de versoes balanceadas.
-- `machine-learning/`: treinamento, avaliacao e reproducao de modelos.
-- `xai/`: extracao de amostras e geracao de explicacoes visuais.
-- `docs/`: relatorios, metricas, graficos e imagens finais das runs.
+| Item | Detalhe |
+|---|---|
+| **Tarefa** | Classificação morfológica de galáxias (10 classes por survey) |
+| **Surveys** | SDSS · DECaLS |
+| **Modelos avaliados** | DINOv2 · EfficientNet · ResNet50 · KNN · DINOv2 Federado |
+| **Total de runs** | 36 runs · 21 pares (modelo, dataset) únicos |
+| **Melhor resultado** | DINOv2 + SDSS (random over-sampling) — balanced accuracy **97,64%** |
+| **XAI** | Grad-CAM · Exemplos de vizinhos mais próximos |
+| **Aprendizado federado** | FedAvg com clientes SDSS e DECaLS |
 
-Todo o codigo do projeto deve ser escrito em ingles, incluindo nomes de arquivos, funcoes, classes, variaveis, comentarios, docstrings, mensagens de erro, logs e chaves de configuracao. O README pode permanecer em portugues.
+---
 
-## Estrutura Planejada
+## Resultados Principais
 
-```text
-.
-├── README.md
-├── main.py
-├── config.yaml
-├── mise.toml
-├── pyproject.toml
-├── uv.lock
-├── dataset/
-│   ├── main.py
-│   ├── input_output.py
-│   ├── raw/
-│   │   ├── sdss.h5
-│   │   └── decals.h5
-│   ├── processed/
-│   └── balancing/
-│       ├── registry.py
-│       ├── smote.py
-│       ├── random_over_sampling.py
-│       └── random_under_sampling.py
-├── machine-learning/
-│   ├── main.py
-│   ├── my-computer.yaml
-│   ├── data_loading.py
-│   ├── pipeline.py
-│   ├── run_storage.py
-│   ├── documentation_storage.py
-│   ├── runs/
-│   └── models/
-│       ├── registry.py
-│       ├── dino.py
-│       ├── vgg16.py
-│       ├── efficientnet.py
-│       ├── resnet50.py
-│       └── k_nearest_neighbors.py
-├── xai/
-│   ├── main.py
-│   ├── sample_extraction.py
-│   ├── explanation_generation.py
-│   ├── artifact_storage.py
-│   └── methods/
-│       ├── registry.py
-│       └── gradient_class_activation_mapping.py
-└── docs/
+### Protocolo Robusto — datasets naturais (`*_raw`)
+
+> Divisão estratificada train/val/test com balanceamento aplicado **somente no treino**. Esta é a evidência científica principal.
+
+| Modelo | Dataset | Accuracy | Balanced Acc. | Macro F1 | ROC-AUC |
+|---|---|---|---|---|---|
+| DINOv2 | sdss_raw | 84,21% | 68,29% | 0,6834 | 0,9086 |
+| EfficientNet | sdss_raw | 83,41% | 69,85% | 0,6912 | 0,9657 |
+| ResNet50 | sdss_raw | 84,27% | 68,95% | 0,6941 | 0,9425 |
+| DINOv2 | decals_raw | 81,29% | 80,49% | 0,7958 | 0,9552 |
+| ResNet50 | decals_raw | 80,23% | 78,27% | 0,7800 | 0,9690 |
+| EfficientNet | decals_raw | 79,71% | 78,10% | 0,7763 | 0,9691 |
+
+![Comparação de modelos — SDSS raw](docs/by_dataset/sdss_raw/comparison.png)
+
+### Ablação — datasets processados (`*_smote`, `*_random_over_sampling`)
+
+> Análise do impacto do balanceamento artificial. Validação e teste permanecem naturais, portanto os valores de teste são inflacionados — interpretar como ablação, não como resultado principal.
+
+| Rank | Modelo | Dataset | Balanced Acc. | Macro F1 | ROC-AUC |
+|---|---|---|---|---|---|
+| 1 | DINOv2 | sdss_random_over_sampling | **97,64%** | 0,9763 | 0,9985 |
+| 2 | EfficientNet | sdss_smote | 97,21% | 0,9720 | 0,9987 |
+| 3 | ResNet50 | sdss_smote | 97,10% | 0,9708 | 0,9985 |
+| 4 | DINOv2 | sdss_smote | 96,43% | 0,9640 | 0,9935 |
+| 5 | DINOv2 | decals_smote | 87,60% | 0,8759 | 0,9820 |
+
+![DINOv2 — balanced accuracy por dataset](docs/by_model/dino/comparison.png)
+
+### Cross-Dataset e Aprendizado Federado
+
+| Cenário | Modelo | Balanced Acc. |
+|---|---|---|
+| Global (treino SDSS+DECaLS) → SDSS | federated_dino | 81,46% |
+| Global (treino SDSS+DECaLS) → DECaLS | federated_dino | 62,43% |
+| Cliente SDSS → SDSS | federated_dino | 78,72% |
+| Cliente DECaLS → DECaLS | federated_dino | 82,99% |
+| DINOv2 treino SDSS → avaliação DECaLS | dino | 49,83% |
+| DINOv2 treino DECaLS → avaliação SDSS | dino | 43,77% |
+
+### Heatmap Geral — Balanced Accuracy (todos os runs)
+
+![Leaderboard — balanced accuracy](docs/leaderboard_balanced_accuracy.png)
+
+---
+
+## Artefatos Entregues
+
+### Arquivos Raiz
+
+| Arquivo | Função |
+|---|---|
+| `README.md` | Este documento — descrição objetiva de todos os artefatos |
+| `config.yaml` | Configuração central do projeto: caminhos, datasets, parâmetros de treino, pipelines, benchmarks, XAI e classes |
+| `main.py` | Orquestrador interativo — permite navegar e lançar os módulos de dataset, machine learning e XAI |
+| `mise.toml` | Define a versão do Python e comandos padronizados do projeto |
+| `pyproject.toml` | Dependências, metadados e ferramentas Python |
+| `uv.lock` | Trava as versões resolvidas das dependências para reprodutibilidade |
+| `artigo.tex` | Artigo científico do projeto em LaTeX |
+
+### `dataset/` — Leitura e Balanceamento
+
+| Arquivo | Função |
+|---|---|
+| `dataset/main.py` | CLI interativa para balanceamento: seleciona datasets e métodos via menus |
+| `dataset/input_output.py` | Leitura e escrita de datasets no formato H5 (chaves `images` e `ans`) |
+| `dataset/analysis.py` | Análise exploratória dos datasets: distribuição de classes, amostras e histogramas de intensidade |
+| `dataset/balancing/registry.py` | Registro central dos métodos de balanceamento disponíveis |
+| `dataset/balancing/smote.py` | SMOTE para imagens: achata, interpola vizinhos da mesma classe e restaura o formato original |
+| `dataset/balancing/random_over_sampling.py` | Duplicação aleatória das classes minoritárias |
+| `dataset/balancing/random_under_sampling.py` | Seleção aleatória das classes majoritárias |
+| `dataset/balancing/augmentation_*.py` | Métodos de aumento de dados: rotação, flip, brilho, ruído, perspectiva, elástico e combinado |
+| `dataset/raw/` | Datasets originais em H5 (não versionados — transferir separadamente) |
+| `dataset/processed/` | Datasets balanceados gerados (não versionados — transferir separadamente) |
+
+**Execução:**
+```bash
+uv run python dataset/main.py
 ```
+CLI interativa — sem parâmetros obrigatórios. Gera arquivos em `dataset/processed/` com nomes como `sdss_smote.h5`, `decals_random_over_sampling.h5`.
+
+---
+
+### `machine-learning/` — Treinamento e Avaliação
+
+| Arquivo | Função |
+|---|---|
+| `machine-learning/main.py` | CLI interativa para treinamento: seleciona modelos, datasets e pipelines |
+| `machine-learning/pipeline.py` | Orquestra o ciclo completo: carregamento, split, balanceamento, treino, avaliação e documentação |
+| `machine-learning/data_loading.py` | Carregamento de datasets H5, splits estratificados e DataLoaders |
+| `machine-learning/dataset_kind.py` | Utilitário que distingue datasets naturais (`raw`) de processados para aplicar o protocolo correto |
+| `machine-learning/metric_computation.py` | Cálculo de métricas: accuracy, balanced accuracy, macro F1, Cohen's Kappa, MCC, ROC-AUC, log loss |
+| `machine-learning/run_storage.py` | Persistência de runs: logs, config, checkpoint e métricas em `machine-learning/runs/` |
+| `machine-learning/documentation_storage.py` | Geração de relatórios Markdown, matrizes de confusão, curvas de aprendizado e distribuição de classes em `docs/` |
+| `machine-learning/leaderboard.py` | Agrega runs de `docs/runs.jsonl` e gera o leaderboard com tabelas e gráficos |
+| `machine-learning/leaderboard_cli.py` | CLI para visualizar e atualizar o leaderboard manualmente |
+| `machine-learning/cross_dataset.py` | Avaliação cross-dataset: treina em um survey e avalia no outro |
+| `machine-learning/cross_dataset_federated.py` | Aprendizado federado FedAvg com clientes SDSS e DECaLS |
+| `machine-learning/computer_configuration.py` | Detecta e persiste especificações de hardware em `machine-learning/my-computer.yaml` |
+| `machine-learning/manifest.py` | Rastreamento de artefatos produzidos por cada run |
+| `machine-learning/text_formatting.py` | Formatação de relatórios e tabelas Markdown |
+| `machine-learning/models/registry.py` | Registro central dos modelos disponíveis |
+| `machine-learning/models/dino.py` | DINOv2 (ViT-S/14) com fine-tuning diferenciado backbone/cabeça |
+| `machine-learning/models/efficientnet.py` | EfficientNet com fine-tuning |
+| `machine-learning/models/resnet50.py` | ResNet-50 com fine-tuning |
+| `machine-learning/models/vgg16.py` | VGG-16 com fine-tuning |
+| `machine-learning/models/k_nearest_neighbors.py` | KNN no espaço de pixels |
+| `machine-learning/runs/` | Artefatos brutos de cada run (não versionados — transferir separadamente) |
+
+**Execução:**
+```bash
+uv run python machine-learning/main.py
+```
+CLI interativa — sem parâmetros obrigatórios. Os parâmetros de treino são definidos em `config.yaml`.
+
+---
+
+### `benchmark/` — Execução de Benchmarks Declarativos
+
+| Arquivo | Função |
+|---|---|
+| `benchmark/main.py` | CLI de benchmarks: lê os protocolos definidos em `config.yaml` e executa sequências de experimentos |
+| `benchmark/orchestrator.py` | Orquestra a sequência de experimentos de um benchmark |
+| `benchmark/dataset_resolution.py` | Resolve os datasets a usar conforme o protocolo do benchmark |
+| `benchmark/recommendations.py` | Gera recomendações automáticas com base nos resultados do benchmark |
+
+**Execução:**
+```bash
+# Interativo — lista os benchmarks disponíveis em config.yaml
+uv run python benchmark/main.py
+
+# Direto — especifica o benchmark pelo nome
+uv run python benchmark/main.py --benchmark everything
+
+# Sem confirmação interativa
+uv run python benchmark/main.py --benchmark robust_full --yes
+```
+
+| Parâmetro | Descrição |
+|---|---|
+| `--benchmark` / `-b` | Nome do benchmark definido em `config.yaml` (ex: `robust_full`, `everything`) |
+| `--yes` / `-y` | Executa sem confirmação interativa |
+
+**Benchmarks disponíveis em `config.yaml`:**
+
+| Nome | Descrição |
+|---|---|
+| `robust_full` | Protocolo principal — SDSS/DECaLS raw com split estratificado e balanceamento apenas no treino |
+| `galaxy_full` | Ablação — comparação com datasets processados (raw + SMOTE) |
+| `cross_dataset_federated` | DINOv2 cross-dataset SDSS/DECaLS + FedAvg (3 rounds, 1 época local) |
+| `everything` | Executa `robust_full` → `galaxy_full` → `cross_dataset_federated` em sequência |
+
+---
+
+### `xai/` — Explicabilidade Visual
+
+| Arquivo | Função |
+|---|---|
+| `xai/main.py` | CLI interativa para extração de amostras e geração de explicações em lote |
+| `xai/sample_extraction.py` | Extrai amostras representativas por classe a partir dos datasets |
+| `xai/explanation_generation.py` | Coordena a geração de explicações para cada amostra extraída |
+| `xai/artifact_storage.py` | Salva imagens de amostras e explicações em `docs/xai/` |
+| `xai/methods/registry.py` | Registro central dos métodos XAI disponíveis |
+| `xai/methods/gradient_class_activation_mapping.py` | Grad-CAM: mapas de ativação por gradiente para modelos de deep learning |
+| `xai/methods/nearest_neighbors.py` | Exemplos de vizinhos mais próximos para KNN |
+
+**Execução:**
+```bash
+uv run python xai/main.py
+```
+
+**Saída:** `docs/xai/<model-name>/<dataset-name>/`
+
+---
+
+### `docs/` — Resultados e Documentação
+
+| Caminho | Conteúdo |
+|---|---|
+| `docs/leaderboard.md` | Leaderboard completo — ranking de todos os 36 runs por balanced accuracy, com tabelas por modelo e por dataset |
+| `docs/leaderboard.csv` | Leaderboard em formato CSV para análise tabular |
+| `docs/leaderboard_*.png` | Heatmaps de métricas: accuracy, balanced accuracy, macro F1, Cohen's Kappa, MCC, ROC-AUC, log loss |
+| `docs/runs.jsonl` | Registro estruturado de todas as runs — fonte primária do leaderboard |
+| `docs/by_dataset/<dataset>/` | Relatórios por dataset: métricas, matrizes de confusão, curvas de aprendizado, distribuição de classes |
+| `docs/by_model/<model>/` | Relatórios por modelo: sumário, métricas e relatório de classificação |
+| `docs/models/<model>/<run>/` | Artefatos detalhados de cada run: `summary.md`, `metrics.md`, `classification_report.md`, `confusion_matrix.png`, `learning_curves.png`, `class_distribution.png` |
+| `docs/dataset/<dataset>/` | Análise exploratória dos datasets: amostras por classe, histogramas de intensidade |
+
+#### Exemplo — DINOv2 + SDSS random over-sampling (melhor run, balanced accuracy 97,64%)
+
+**Curvas de aprendizado**
+
+![Curvas de aprendizado](docs/models/dino/dino-sdss_random_over_sampling-10-05-2026-2-sdss_random_over_sampling/learning_curves.png)
+
+**Matriz de confusão normalizada**
+
+![Matriz de confusão normalizada](docs/models/dino/dino-sdss_random_over_sampling-10-05-2026-2-sdss_random_over_sampling/confusion_matrix_normalized.png)
+
+**Curvas ROC por classe**
+
+![Curvas ROC](docs/models/dino/dino-sdss_random_over_sampling-10-05-2026-2-sdss_random_over_sampling/roc_curves.png)
+
+---
 
 ## Datasets
 
-Os datasets originais devem ficar em:
+Os arquivos originais devem ser colocados em:
 
-```text
+```
 dataset/raw/sdss.h5
 dataset/raw/decals.h5
 ```
 
-Cada arquivo H5 deve conter as chaves:
+Cada arquivo H5 contém as chaves:
 
-- `images`: imagens do dataset.
-- `ans`: rotulos inteiros das classes.
+| Chave | Descrição |
+|---|---|
+| `images` | Array de imagens do survey |
+| `ans` | Rótulos inteiros das classes morfológicas |
 
-Os datasets processados serao salvos em `dataset/processed/`, mantendo a mesma convencao de chaves.
+### Classes por Survey
 
-## Ambiente
+**SDSS** (10 classes):
 
-O projeto deve usar `mise-en-place` e `uv` para garantir compatibilidade de ambiente e instalacao reproduzivel.
+| ID | Classe |
+|---|---|
+| 0 | disk_face_on_no_spiral |
+| 1 | smooth_completely_round |
+| 2 | smooth_in_between_round |
+| 3 | smooth_cigar_shaped |
+| 4 | disk_edge_on_rounded_bulge |
+| 5 | disk_edge_on_boxy_bulge |
+| 6 | disk_edge_on_no_bulge |
+| 7 | disk_face_on_tight_spiral |
+| 8 | disk_face_on_medium_spiral |
+| 9 | disk_face_on_loose_spiral |
 
-- `mise.toml`: define a versao do Python e comandos padronizados do projeto.
-- `pyproject.toml`: define dependencias, metadados e ferramentas Python.
-- `uv.lock`: trava as versoes resolvidas das dependencias.
+![Amostras por classe — SDSS raw](docs/dataset/sdss-raw/sample_mosaic.png)
 
-Fluxo esperado:
+![Distribuição de classes — SDSS raw](docs/dataset/sdss-raw/class_distribution.png)
+
+![Balanço de classes — SDSS raw](docs/dataset/sdss-raw/class_balance.png)
+
+**DECaLS** (10 classes):
+
+| ID | Classe |
+|---|---|
+| 0 | disturbed |
+| 1 | merging |
+| 2 | round_smooth |
+| 3 | in_between_round_smooth |
+| 4 | cigar_shaped_smooth |
+| 5 | barred_spiral |
+| 6 | unbarred_tight_spiral |
+| 7 | unbarred_loose_spiral |
+| 8 | edge_on_no_bulge |
+| 9 | edge_on_with_bulge |
+
+![Amostras por classe — DECaLS raw](docs/dataset/decals-raw/sample_mosaic.png)
+
+---
+
+## Configuração Principal (`config.yaml`)
+
+Os parâmetros centrais do projeto são definidos em `config.yaml`. Os mais relevantes:
+
+| Seção | Parâmetro | Valor padrão | Descrição |
+|---|---|---|---|
+| `training` | `epoch_count` | 50 | Número máximo de épocas |
+| `training` | `early_stopping_patience` | 8 | Paciência do early stopping |
+| `training` | `batch_size` | 32 | Tamanho do batch |
+| `training` | `image_size` | 224 | Resolução de entrada (pixels) |
+| `training` | `random_seed` | 42 | Semente aleatória para reprodutibilidade |
+| `training` | `learning_rate` | 1e-4 | Taxa de aprendizado |
+| `split_ratios` | `train` / `validation` / `test` | 70% / 15% / 15% | Divisão estratificada |
+| `training_balance` | `apply_to` | `train_only` | Balanceamento aplicado somente ao treino |
+| `models.dino` | `model_name` | `vit_small_patch14_dinov2` | Backbone DINOv2 |
+
+---
+
+## Reprodução do Ambiente
 
 ```bash
+# Instalar dependências de ambiente
 mise install
+
+# Instalar dependências Python
 uv sync
-uv run python main.py
-```
 
-As CLIs internas tambem devem ser executaveis com `uv run`:
-
-```bash
-uv run python dataset/main.py
-uv run python machine-learning/main.py
-uv run python xai/main.py
-```
-
-## Orquestrador Principal
-
-O arquivo `main.py`, na raiz do projeto, deve funcionar como orquestrador interativo.
-
-Ele deve permitir navegar para os modulos principais:
-
-- dataset balancing;
-- machine learning;
-- XAI.
-
-O orquestrador deve ser desacoplado. Ele apenas aponta ou delega para os modulos, sem concentrar a logica deles. Cada CLI interna deve continuar funcionando diretamente:
-
-```bash
-uv run python dataset/main.py
-uv run python machine-learning/main.py
-uv run python xai/main.py
-```
-
-## Balanceamento de Datasets
-
-A CLI de balanceamento ficara em `dataset/main.py` e deve ser interativa. O usuario deve selecionar os datasets e os metodos usando checkboxes ou listas de selecao, sem precisar escrever todos os parametros no comando.
-
-Exemplo:
-
-```bash
-python dataset/main.py
-```
-
-Metodos iniciais:
-
-- `smote`: SMOTE para imagens, achatando cada imagem, interpolando vizinhos da mesma classe e restaurando o formato original.
-- `random_over_sampling`: duplicacao aleatoria das classes minoritarias.
-- `random_under_sampling`: selecao aleatoria das classes majoritarias.
-
-Exemplos de saida:
-
-```text
-dataset/processed/sdss_smote.h5
-dataset/processed/decals_random_over_sampling.h5
-dataset/processed/sdss_smote_random_under_sampling.h5
-```
-
-## Machine Learning
-
-A CLI de machine learning ficara em `machine-learning/main.py`. Ela deve ser interativa e executar pipelines configuraveis, permitindo selecionar modelos, datasets raw ou processed e pipelines usando checkboxes ou listas de selecao.
-
-Comando principal:
-
-```bash
-python machine-learning/main.py
-```
-
-### Protocolo experimental (valido vs ablacao)
-
-- Protocolo principal (evidencia cientifica): usar datasets `*_raw`, fazer split estratificado train/validation/test e aplicar balanceamento somente no treino (`training_balance.apply_to: train_only`).
-- Protocolo auxiliar (ablacao): usar datasets processados (`*_smote`, `*_random_over_sampling`, etc.) apenas para medir impacto de balanceamento artificial.
-- Validacao e teste devem permanecer naturais no protocolo principal.
-- `docs/leaderboard_robust.md` e a fonte oficial para conclusoes de generalizacao.
-- `docs/leaderboard.md` deve ser tratado como analise secundaria (inclui cenarios processados/ablacao).
-
-Modelos iniciais:
-
-- `dino`
-- `vgg16`
-- `efficientnet`
-- `resnet50`
-- `k_nearest_neighbors`
-
-Cada modelo deve ficar em um arquivo separado dentro de `machine-learning/models/`, com registro central em `machine-learning/models/registry.py`.
-
-## Configuracao do Computador
-
-Na primeira execucao da CLI de machine learning, o projeto deve gerar automaticamente:
-
-```text
-machine-learning/my-computer.yaml
-```
-
-Esse arquivo deve conter as especificacoes detectadas do computador e os limites de recursos que a pessoa quer dedicar aos treinos.
-
-Por padrao, a configuracao deve alocar todos os recursos disponiveis, incluindo GPU quando houver suporte. Se a pessoa nao quiser usar todos os recursos, ela pode editar `machine-learning/my-computer.yaml`.
-
-Conteudo esperado:
-
-```yaml
-computer:
-  processor_name: auto_detected
-  physical_core_count: auto_detected
-  logical_core_count: auto_detected
-  total_memory_gigabytes: auto_detected
-  gpu_available: auto_detected
-  gpu_name: auto_detected
-  gpu_memory_gigabytes: auto_detected
-
-resource_limits:
-  use_gpu: true
-  gpu_device: auto
-  maximum_gpu_memory_gigabytes: null
-  maximum_cpu_worker_count: null
-  maximum_memory_gigabytes: null
-  use_mixed_precision: true
-```
-
-Valores `null` em limites significam "usar o maximo disponivel".
-
-## Runs
-
-Cada execucao modelo x dataset deve criar uma pasta em:
-
-```text
-machine-learning/runs/<model-name>-<dataset-name>-<day-month-year>/
-```
-
-Exemplo:
-
-```text
-machine-learning/runs/vgg16-sdss-smote-26-10-2001/
-```
-
-Dentro da pasta da run devem existir:
-
-- `run.log`: logs completos da execucao.
-- `config.yaml`: copia da configuracao efetiva, no mesmo formato da configuracao de entrada.
-- `<model-name>-<dataset-name>-<run-date>.pth`: checkpoint para reproducao.
-- `metrics.json`: metricas da run.
-- artefatos brutos necessarios para reproducibilidade.
-
-Se uma pasta de run com o mesmo nome ja existir, a implementacao deve adicionar um sufixo incremental, por exemplo:
-
-```text
-vgg16-sdss-smote-26-10-2001-2/
-```
-
-## Documentacao das Runs
-
-Os relatorios finais das runs devem ser salvos em `docs/`:
-
-```text
-docs/<model-name>/<run-name>-<dataset-name>/
-```
-
-Exemplo:
-
-```text
-docs/k_nearest_neighbors/26-10-2001-sdss-smote/
-```
-
-Arquivos esperados:
-
-- `summary.md`: resumo da run, dataset, modelo, configuracoes principais, metricas e indice de artefatos.
-- `metrics.md`: tabela de metricas.
-- `classification_report.md`: relatorio por classe.
-- `confusion_matrix.png`: matriz de confusao.
-- `learning_curves.png`: curvas de aprendizado para modelos treinaveis.
-- `class_distribution.png`: distribuicao de classes.
-
-Para `k_nearest_neighbors`, podem ser adicionados:
-
-- `neighbor_examples.png`
-- `distance_distribution.png`
-
-## XAI
-
-A CLI de explicabilidade ficara em `xai/main.py`. Ela deve ser interativa e permitir extrair amostras e gerar explicacoes em lote usando selecoes por checkbox ou lista.
-
-Comando:
-
-```bash
-python xai/main.py
-```
-
-Estrutura de saida:
-
-```text
-xai/<model-name>/<dataset-name>/samples/*.png
-xai/<model-name>/<dataset-name>/xai/*.png
-```
-
-Exemplo:
-
-```text
-xai/k_nearest_neighbors/sdss_smote/samples/spiral_barred_0001.png
-xai/k_nearest_neighbors/sdss_smote/xai/spiral_barred_0001.png
-```
-
-Quando os nomes das classes estiverem definidos em `config.yaml`, eles devem ser usados nos nomes dos arquivos. Caso contrario, deve ser usado o formato:
-
-```text
-class_0_0001.png
-```
-
-Suporte inicial planejado:
-
-- Grad-CAM para modelos de deep learning.
-- Exemplos de vizinhos mais proximos para `k_nearest_neighbors`.
-
-## Configuracao
-
-Toda configuracao deve ficar em `config.yaml`, incluindo caminhos, datasets, pipelines, parametros de treino, parametros por modelo, configuracao de XAI e nomes das classes.
-
-Exemplo:
-
-```yaml
-paths:
-  raw_dataset_directory: dataset/raw
-  processed_dataset_directory: dataset/processed
-  machine_learning_run_directory: machine-learning/runs
-  machine_learning_computer_configuration_file: machine-learning/my-computer.yaml
-  documentation_directory: docs
-  xai_output_directory: xai
-
-training:
-  epoch_count: 50
-  early_stopping_patience: 8
-  batch_size: 32
-  image_size: 224
-  random_seed: 42
-
-pipelines:
-  baseline:
-    model_names:
-      - dino
-      - vgg16
-      - efficientnet
-      - resnet50
-      - k_nearest_neighbors
-    dataset_names:
-      - sdss_raw
-      - decals_raw
-      - sdss_smote
-      - decals_smote
-
-  baseline_xai:
-    model_names:
-      - vgg16
-      - resnet50
-      - k_nearest_neighbors
-    dataset_names:
-      - sdss_smote
-      - decals_smote
-```
-
-## Padroes de Codigo
-
-- Todo codigo deve estar em ingles.
-- Use nomes autoexplicativos.
-- Evite siglas e abreviacoes que dificultem leitura.
-- Mantenha funcoes pequenas e com responsabilidade unica.
-- Separe cada modelo em seu proprio arquivo.
-- Separe cada metodo de balanceamento em seu proprio arquivo.
-- Centralize registros em arquivos `registry.py`.
-- As CLIs devem ser interativas, com checkboxes ou listas de selecao para escolher datasets, modelos, pipelines e metodos.
-- Use `mise-en-place` e `uv` como ferramentas padrao de ambiente e execucao.
-- Mantenha o orquestrador raiz desacoplado das CLIs internas.
-
-## Validacao Esperada
-
-Comandos de ajuda:
-
-```bash
+# Verificar instalação
 uv run python main.py --help
-uv run python dataset/main.py --help
-uv run python machine-learning/main.py --help
-uv run python xai/main.py --help
 ```
 
-Cenarios minimos de teste:
+Os arquivos `mise.toml`, `pyproject.toml` e `uv.lock` garantem reprodutibilidade do ambiente Python.
 
-- carregar e salvar H5 com chaves `images` e `ans`;
-- aplicar cada metodo de balanceamento;
-- aplicar multiplos balanceamentos em sequencia;
-- executar uma pipeline curta com `k_nearest_neighbors`;
-- gerar `machine-learning/my-computer.yaml` na primeira execucao da CLI de machine learning;
-- criar uma run em `machine-learning/runs/`;
-- criar relatorios em `docs/`;
-- extrair amostras e gerar XAI em lote.
+---
 
-## Arquivos Grandes
+## Artefatos Não Versionados
 
-Arquivos H5, checkpoints, runs, imagens geradas e outros artefatos grandes nao devem ser versionados no Git.
+Os itens abaixo não estão no repositório Git por serem grandes demais, mas devem estar incluídos na pasta de entrega:
+
+| Caminho | Conteúdo |
+|---|---|
+| `dataset/raw/` | Datasets originais SDSS e DECaLS (`.h5`) |
+| `dataset/processed/` | Datasets balanceados gerados (`.h5`) |
+| `machine-learning/runs/` | Checkpoints, logs e métricas brutas de cada run |
+| `docs/models/` | Relatórios detalhados de todos os 36 runs |
