@@ -4,8 +4,6 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.5+-EE4C2C?logo=pytorch&logoColor=white)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 ![Runs](https://img.shields.io/badge/runs-36-informational)
-![Balanced Acc Robusto](https://img.shields.io/badge/balanced_acc_(protocolo_robusto)-84,27%25-brightgreen)
-![Balanced Acc Ablação](https://img.shields.io/badge/balanced_acc_(ablação_pós--patch)-97,21%25-yellow)
 
 Classificação morfológica de galáxias com aprendizado profundo, balanceamento de dados, aprendizado federado e explicabilidade visual (XAI).
 
