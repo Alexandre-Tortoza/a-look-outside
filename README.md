@@ -54,7 +54,7 @@ Classificação morfológica de galáxias com aprendizado profundo, balanceament
 
 ![DINOv2 — balanced accuracy por dataset](docs/by_model/dino/comparison.png)
 
-[^leak]: Run executada antes do patch de 26/05/2026 (commit `1bb9897d`) — o balanceamento foi aplicado ao dataset completo **antes** da divisão treino/validação/teste, vazando informação de validação e teste para o treino. Os valores inflacionados são um limite superior artificial; as runs pós-patch (commit `6d2339f3`, a partir de 26/05/2026) são a evidência válida.
+[^leak]: Run executada antes do patch — o balanceamento foi aplicado ao dataset completo **antes** da divisão treino/validação/teste, vazando informação de validação e teste para o treino. Os valores inflacionados são um limite superior artificial; as runs pós-patch são a evidência válida.
 
 ### Cross-Dataset e Aprendizado Federado
 
