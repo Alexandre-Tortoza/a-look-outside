@@ -25,6 +25,7 @@ Este documento descreve, de forma objetiva, os artefatos entregues no projeto, s
 │   └── balancing/
 ├── machine-learning/
 │   ├── main.py
+│   ├── my-computer.yaml               # configuração local de recursos (gerada na 1ª execução)
 │   ├── pipeline.py
 │   ├── runs/                         # logs, checkpoints e métricas por execução
 │   └── models/
@@ -39,7 +40,7 @@ Este documento descreve, de forma objetiva, os artefatos entregues no projeto, s
 | Artefato | Função no projeto | Parâmetros de execução (quando aplicável) |
 |---|---|---|
 | `main.py` | Orquestrador interativo para iniciar benchmark, dataset, machine learning e XAI. | Sem parâmetros de linha de comando; usa `config.yaml`. |
-| `benchmark/main.py` | Executa benchmarks declarativos fim a fim (dataset → treino → avaliação → XAI/recomendações). | `--benchmark` (`-b`): nome do benchmark em `config.yaml`; `--yes` (`-y`): pula confirmação interativa. |
+| `benchmark/main.py` | Executa benchmarks declarativos fim a fim (dataset → treino → avaliação → XAI/recomendações). | `--benchmark` (`-b`): nome do benchmark em `config.yaml`; `--yes` (`-y`): pula confirmação interativa. Benchmarks ficam em `config.yaml > benchmarks` (ex.: `everything`, `robust_full`, `cross_dataset_federated`). |
 | `dataset/main.py` | Balanceamento e análise de datasets `.h5`. | Interativo; usa `config.yaml` (ex.: `paths.raw_dataset_directory`, `paths.processed_dataset_directory`, `random_seed`, `dataset_analysis.output_directory`). |
 | `machine-learning/main.py` | Treino e avaliação dos modelos. Gera runs reproduzíveis. | Interativo; usa `config.yaml` (ex.: `training.*`, `models.*`, `pipelines.*`) e `machine-learning/my-computer.yaml` para limites de hardware. |
 | `xai/main.py` | Geração de explicações visuais a partir de runs treinadas. | Interativo; usa `config.yaml` (ex.: `xai.default_methods`, `paths.xai_output_directory`). |
